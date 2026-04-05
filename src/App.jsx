@@ -318,9 +318,9 @@ export default function App() {
     }
 
     const allOptions = shuffleArray([correctItem, ...wrongItems]);
+    setSelectedAnswer(null);
     setCurrentQuestion(correctItem);
     setOptions(allOptions);
-    setSelectedAnswer(null);
     setIsAnimating(false);
 
     if (currentSettings.audioMode !== 'manual') {
@@ -1143,7 +1143,7 @@ export default function App() {
               <div className="grid grid-cols-2 gap-4 mt-auto flex-shrink-0 relative">
                 {options.map((option, index) => (
                   <button
-                    key={index}
+                    key={`${currentQuestion.romaji}-${option.romaji}`}
                     onClick={() => handleAnswerClick(option)}
                     disabled={isAnimating}
                     className={`text-4xl font-medium p-6 sm:p-8 rounded-2xl transition-all duration-300 ease-out active:scale-95 flex items-center justify-center tracking-widest ${getButtonStyle(option)}`}
