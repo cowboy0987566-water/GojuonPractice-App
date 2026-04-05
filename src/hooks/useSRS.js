@@ -1,13 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export const useSRS = () => {
   const [srsData, setSrsData] = useState(() => {
     try {
-      const savedData = localStorage.getItem('gojuon_srs_v1');
-      return savedData ? JSON.parse(savedData) : {};
-    } catch (e) {
-      return {};
-    }
+      const saved = localStorage.getItem('gojuon_srs_v1');
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
   });
 
   useEffect(() => {
@@ -15,9 +13,7 @@ export const useSRS = () => {
   }, [srsData]);
 
   const updateSRS = (romaji, isCorrect) => {
-    const key = romaji;
-    const item = srsData[key] || { rep: 0, interval: 0, ease: 2.5, nextReview: 0, mistakes: 0, corrects: 0 };
-    
+    const item = srsData[romaji] || { rep: 0, interval: 0, ease: 2.5, nextReview: 0, mistakes: 0, corrects: 0 };
     let grade = isCorrect ? 4 : 0;
     let { rep, interval, ease, mistakes, corrects = 0 } = item;
 
@@ -37,48 +33,34 @@ export const useSRS = () => {
     if (ease < 1.3) ease = 1.3;
 
     const nextReview = Date.now() + interval * 24 * 60 * 60 * 1000;
-    const updatedSrsData = { ...srsData, [key]: { rep, interval, ease, nextReview, mistakes, corrects } };
-    setSrsData(updatedSrsData);
-    return updatedSrsData;
+    const updated = { ...srsData, [romaji]: { rep, interval, ease, nextReview, mistakes, corrects } };
+    setSrsData(updated);
+    return updated;
   };
 
-  return { srsData, updateSRS, setSrsData };
+  return { srsData, setSrsData, updateSRS };
 };
 
 export const useDailyStats = () => {
   const [dailyStats, setDailyStats] = useState(() => {
     try {
-      const savedData = localStorage.getItem('gojuon_daily_stats_v1');
-      return savedData ? JSON.parse(savedData) : {};
-    } catch (e) {
-      return {};
-    }
+      const saved = localStorage.getItem('gojuon_daily_stats_v1');
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
   });
 
   useEffect(() => {
     localStorage.setItem('gojuon_daily_stats_v1', JSON.stringify(dailyStats));
   }, [dailyStats]);
 
-  const getTodayKey = (dateObj = new Date()) => {
-    const y = dateObj.getFullYear();
-    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const d = String(dateObj.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  };
-
-  const updateDailyStats = (romaji, isCorrect) => {
-    const today = getTodayKey();
+  const updateDailyStats = (romaji, isCorrect, todayKey) => {
     setDailyStats(prev => {
-      const todayStats = prev[today] || { total: 0, correct: 0, wrong: 0, wrongChars: [] };
+      const todayStats = prev[todayKey] || { total: 0, correct: 0, wrong: 0, wrongChars: [] };
       const newWrongChars = [...(todayStats.wrongChars || [])];
-      
-      if (!isCorrect && !newWrongChars.includes(romaji)) {
-        newWrongChars.push(romaji);
-      }
-      
+      if (!isCorrect && !newWrongChars.includes(romaji)) newWrongChars.push(romaji);
       return {
         ...prev,
-        [today]: {
+        [todayKey]: {
           total: todayStats.total + 1,
           correct: todayStats.correct + (isCorrect ? 1 : 0),
           wrong: todayStats.wrong + (isCorrect ? 0 : 1),
@@ -88,5 +70,5 @@ export const useDailyStats = () => {
     });
   };
 
-  return { dailyStats, updateDailyStats, getTodayKey, setDailyStats };
+  return { dailyStats, updateDailyStats };
 };
