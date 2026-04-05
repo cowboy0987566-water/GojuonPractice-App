@@ -255,8 +255,8 @@ export default function App() {
   const isLangPicker = gameState === 'langPicker';
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-2 sm:p-4 font-sans selection:bg-rose-200">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col relative" style={{ maxHeight: '95vh' }}>
+    <div className="h-[100dvh] h-screen bg-slate-100 flex items-center justify-center sm:p-4 font-sans selection:bg-rose-200">
+      <div className="w-full h-full max-w-md bg-white sm:rounded-3xl shadow-xl flex flex-col overflow-hidden sm:max-h-[95vh]">
 
         {/* ── Header ── */}
         <div className="bg-rose-500 pt-5 pb-4 px-5 text-white text-center relative flex-shrink-0 z-10">
@@ -289,7 +289,7 @@ export default function App() {
         </div>
 
         {/* ── 內容區 ── */}
-        <div className="p-4 sm:p-5 flex-grow flex flex-col overflow-y-auto bg-slate-50">
+        <div className="p-4 sm:p-5 flex-grow flex flex-col overflow-y-auto bg-slate-50 min-h-0">
 
           {/* 🟠 答題畫面（覆蓋所有 tab） */}
           {isPlaying && currentQuestion && (
