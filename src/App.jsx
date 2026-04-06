@@ -295,8 +295,8 @@ export default function App() {
   const isLangPicker = gameState === 'langPicker';
 
   return (
-    <div className="h-[100dvh] h-screen bg-slate-100 flex items-center justify-center sm:p-4 font-sans selection:bg-rose-200">
-      <div className="w-full h-full max-w-md bg-white sm:rounded-3xl shadow-xl flex flex-col overflow-hidden sm:max-h-[95vh]">
+    <div className="h-[100dvh] bg-slate-100 flex items-center justify-center sm:p-4 font-sans selection:bg-rose-200 overflow-hidden">
+      <div className="w-full h-full max-w-md bg-white sm:rounded-3xl shadow-xl flex flex-col overflow-hidden sm:max-h-[95vh] relative">
 
         {/* ── Header ── */}
         <div className="bg-rose-500 pt-5 pb-4 px-5 text-white text-center relative flex-shrink-0 z-10">

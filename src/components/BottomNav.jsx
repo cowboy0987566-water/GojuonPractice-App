@@ -20,8 +20,9 @@ const tabs = [
 
 export const BottomNav = ({ activeTab, onTabChange, t, uiLang }) => {
   return (
-    <nav className="flex-shrink-0 bg-white border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
-      <div className="flex items-stretch">
+    <nav className="flex-shrink-0 bg-white border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] 
+      pb-[env(safe-area-inset-bottom,0px)]">
+      <div className="flex items-stretch px-2 sm:px-0">
         {tabs.map(({ id, icon: Icon, labelKey }) => {
           const isActive = activeTab === id;
           const label = labelKey === 'HOME' ? (homeLabels[uiLang] || homeLabels['zh-TW']) : t(labelKey);
