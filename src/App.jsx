@@ -53,8 +53,8 @@ export default function App() {
   const applyPreset = (preset) => {
     switch (preset) {
       case 'basic':
-        setSelectedRows(['rowA','rowKa','rowSa','rowTa','rowNa','rowHa','rowMa','rowYa','rowRa','rowWa']);
-        setSelectedCols(colDefs.map(c => c.id));
+        setSelectedRows(['a', 'ka', 'sa', 'ta', 'na', 'ha', 'ma', 'ya', 'ra', 'wa']);
+        setSelectedCols(['col-a', 'col-i', 'col-u', 'col-e', 'col-o']);
         break;
       case 'dakuon':
         setSelectedRows(['rowDakuon','rowHandakuon']);
@@ -157,11 +157,17 @@ export default function App() {
       if (kana.romaji === 'xtsu') return false;
       const rowMatch = rowDefs.find(r => r.chars.includes(kana.romaji));
       const colMatch = colDefs.find(c => c.chars.includes(kana.romaji));
+      
       const inRow = rowMatch && selectedRows.includes(rowMatch.id);
       const inCol = colMatch && selectedCols.includes(colMatch.id);
+
+      // 如果兩者都有選，取交集
       if (selectedRows.length > 0 && selectedCols.length > 0) return inRow && inCol;
+      // 如果只選行
       if (selectedRows.length > 0) return inRow;
+      // 如果只選段
       if (selectedCols.length > 0) return inCol;
+      
       return false;
     });
 
