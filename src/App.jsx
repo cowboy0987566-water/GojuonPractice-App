@@ -57,12 +57,12 @@ export default function App() {
         setSelectedCols(['col-a', 'col-i', 'col-u', 'col-e', 'col-o']);
         break;
       case 'dakuon':
-        setSelectedRows(['rowDakuon','rowHandakuon']);
-        setSelectedCols(['colA','colI','colU','colE','colO']);
+        setSelectedRows(['dakuon', 'handakuon']);
+        setSelectedCols(['col-a', 'col-i', 'col-u', 'col-e', 'col-o']);
         break;
       case 'yoon':
-        setSelectedRows(['rowYoon']);
-        setSelectedCols(['colYa','colYu','colYo']);
+        setSelectedRows(['yoon']);
+        setSelectedCols(['col-ya', 'col-yu', 'col-yo']);
         break;
       case 'all':
         setSelectedRows(rowDefs.map(r => r.id));
