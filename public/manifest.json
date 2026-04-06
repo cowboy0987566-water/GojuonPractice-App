@@ -1,0 +1,17 @@
+{
+  "name": "五十音特訓 | Gojuon Practice",
+  "short_name": "五十音特訓",
+  "description": "全方位的日文五十音學習工具，包含聽力、羅馬拼音、反向羅馬與拼寫測驗。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f43f5e",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

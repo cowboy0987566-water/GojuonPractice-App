@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Volume2, Play, CheckCircle2, XCircle, CalendarDays, ChevronLeft, ChevronRight, Zap, Globe, Eye, EyeOff, Edit2, KeyRound, Users, Settings2, X } from 'lucide-react';
+import { Volume2, Play, CheckCircle2, XCircle, CalendarDays, ChevronLeft, ChevronRight, Zap, Globe, Eye, EyeOff, Edit2, KeyRound, Users, Settings2, X, Download, Share } from 'lucide-react';
 
 // 資料層
 import { kanaData, tableLayout, rowDefs, rowGroups, colDefs, colGroups, getTodayKey, shuffleArray } from './data/kanaData';
@@ -29,6 +29,7 @@ export default function App() {
   const [availableVoices, setAvailableVoices] = useState([]);
   const [tableDisplay, setTableDisplay] = useState({ hiragana: true, katakana: true, romaji: true, stats: false });
   const [showQuickSettings, setShowQuickSettings] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [calMonth, setCalMonth] = useState(new Date());
   const [selDateStr, setSelDateStr] = useState(getTodayKey());
 
@@ -53,7 +54,29 @@ export default function App() {
     };
     loadVoices();
     if ('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
   }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') setDeferredPrompt(null);
+  };
+
+  const isIos = () => {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  };
+
+  const isStandalone = () => {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  };
 
   // ─── 工具函數 ───
   const t = useCallback((key, langOverride = null) => {
@@ -851,6 +874,39 @@ export default function App() {
                   </button>
                 </div>
               ))}
+              {/* PWA 安裝按鈕 */}
+              {!isStandalone() && (
+                <div className="mt-8 pt-8 border-t border-slate-100">
+                  <div className="bg-rose-50 rounded-3xl p-6 border-2 border-rose-100">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-rose-500 text-white rounded-xl shadow-sm">
+                        <Download size={24} />
+                      </div>
+                      <div className="flex flex-col">
+                        <h3 className="font-bold text-slate-800 text-lg leading-tight"><DT tKey="pwaTitle" flexCol={false} /></h3>
+                        <p className="text-xs text-slate-500 mt-0.5"><DT tKey="pwaSub" flexCol={false} /></p>
+                      </div>
+                    </div>
+
+                    {deferredPrompt ? (
+                      <button onClick={handleInstallClick} className="w-full py-4 bg-rose-500 text-white font-bold rounded-2xl shadow-lg shadow-rose-200 active:scale-95 transition-all flex items-center justify-center gap-3">
+                        <Download size={20} />
+                        <DT tKey="pwaBtn" flexCol={false} />
+                      </button>
+                    ) : (
+                      <div className="bg-white/80 p-5 rounded-2xl border border-rose-100 shadow-sm">
+                        <div className="flex items-center gap-2 text-rose-500 font-bold text-sm mb-2">
+                          <Share size={18} />
+                          <DT tKey={isIos() ? 'pwaIos' : 'pwaTitle'} flexCol={false} />
+                        </div>
+                        <div className="text-sm text-slate-600 leading-relaxed font-medium bg-rose-50/50 p-3 rounded-xl">
+                          <DT tKey="pwaIosStep" flexCol={false} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
