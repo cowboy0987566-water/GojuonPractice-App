@@ -433,10 +433,7 @@ export default function App() {
 
               {/* 提示 + 開始按鈕 */}
               <div className="mt-auto">
-                <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl mb-4 text-center">
-                  <span className="text-amber-800 text-xs font-bold flex items-center justify-center gap-1"><Zap size={13} className="text-amber-500" />{t('algoT')}</span>
-                  <DT tKey="algoD" spanClass="text-[0.65rem] text-amber-700/80 mt-1 block" />
-                </div>
+
                 <div className="mb-3 text-sm font-bold text-slate-600"><DT tKey="s3" flexCol={false} spanClass="leading-tight" /></div>
                 <div className="space-y-3">
                   {['hira-to-kata', 'kata-to-hira'].map(m => (
