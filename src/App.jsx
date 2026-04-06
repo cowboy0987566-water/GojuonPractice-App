@@ -54,7 +54,7 @@ export default function App() {
     switch (preset) {
       case 'basic':
         setSelectedRows(['rowA','rowKa','rowSa','rowTa','rowNa','rowHa','rowMa','rowYa','rowRa','rowWa']);
-        setSelectedCols(['colA','colI','colU','colE','colO','colN']);
+        setSelectedCols(colDefs.map(c => c.id));
         break;
       case 'dakuon':
         setSelectedRows(['rowDakuon','rowHandakuon']);
@@ -161,7 +161,7 @@ export default function App() {
       const inCol = colMatch && selectedCols.includes(colMatch.id);
       if (selectedRows.length > 0 && selectedCols.length > 0) return inRow && inCol;
       if (selectedRows.length > 0) return inRow;
-      if (selectedCols.length > 0) return inCol && !tableLayout.dakuon.flat().includes(kana.romaji);
+      if (selectedCols.length > 0) return inCol;
       return false;
     });
 
@@ -389,10 +389,8 @@ export default function App() {
 
                 {mode !== 'audio-to-kana' && (
                   <div className={`${mode === 'romaji-to-kana' ? 'text-[4.5rem] uppercase tracking-widest text-indigo-600' : 'text-[4.5rem] sm:text-[5rem] text-slate-950'} font-bold leading-none mt-4 mb-2`}>
-                    {mode === 'hira-to-kata' ? currentQuestion.hiragana :
-                     mode === 'kata-to-hira' ? currentQuestion.katakana :
-                     mode === 'romaji-to-kana' ? currentQuestion.romaji :
-                     `${currentQuestion.hiragana} / ${currentQuestion.katakana}`}
+                    {mode === 'romaji-to-kana' ? currentQuestion.romaji :
+                     settings.targetKana === 'hira' ? currentQuestion.hiragana : currentQuestion.katakana}
                   </div>
                 )}
 
