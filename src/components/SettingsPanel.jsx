@@ -31,7 +31,7 @@ export const SettingsPanel = ({
           <div className="p-2 bg-rose-50 rounded-xl text-rose-500">
             <Globe size={20} />
           </div>
-          <DT tKey="langBtn" settings={settings} spanClass="font-bold text-slate-700" flexCol={false} />
+          <DT tKey="langBtn" settings={settings} spanClass="font-bold text-slate-950" flexCol={false} />
         </div>
         <button onClick={() => setGameState('langPicker')} className="px-4 py-2 bg-rose-100 text-rose-700 rounded-xl text-sm font-bold hover:bg-rose-200 transition-colors">
           {i18n[settings.uiLang]?.label || 'Language'}
@@ -42,8 +42,8 @@ export const SettingsPanel = ({
       <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm transition-all hover:border-rose-200">
         <div className="flex justify-between items-center mb-3">
           <div>
-            <DT tKey="ed" settings={settings} spanClass="font-bold text-slate-700 leading-tight" />
-            <DT tKey="edD" settings={settings} spanClass="text-xs text-slate-500 mt-1" />
+            <DT tKey="ed" settings={settings} spanClass="font-bold text-slate-950 leading-tight" />
+            <DT tKey="edD" settings={settings} spanClass="text-xs text-slate-800 mt-1" />
           </div>
           <span className="text-xl font-bold text-rose-500">{settings.errorDisplayTime === 0 ? t('manual') : `${settings.errorDisplayTime}s`}</span>
         </div>
@@ -55,9 +55,9 @@ export const SettingsPanel = ({
       {/* 語音人聲 */}
       {availableVoices.length > 0 && (
         <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm transition-all hover:border-rose-200">
-          <DT tKey="voice" settings={settings} spanClass="font-bold text-slate-700 mb-3 block" />
+          <DT tKey="voice" settings={settings} spanClass="font-bold text-slate-950 mb-3 block" />
           <select value={settings.selectedVoiceURI || ''} onChange={e => setSettings({...settings, selectedVoiceURI: e.target.value})}
-            className="w-full p-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-medium focus:outline-none focus:border-rose-400 appearance-none">
+            className="w-full p-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-950 font-medium focus:outline-none focus:border-rose-400 appearance-none">
             <option value="">-- {t('defVoice')} --</option>
             {availableVoices.map((v, idx) => <option key={idx} value={v.voiceURI}>{v.name}</option>)}
           </select>
@@ -66,7 +66,7 @@ export const SettingsPanel = ({
 
       {/* 發音模式 */}
       <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm transition-all hover:border-rose-200">
-        <DT tKey="am" settings={settings} spanClass="font-bold text-slate-700 mb-4 block" />
+        <DT tKey="am" settings={settings} spanClass="font-bold text-slate-950 mb-4 block" />
         <div className="flex flex-col space-y-2">
           {[['auto','amA'],['manual','amM'],['repeat','amR']].map(([id, tk]) => (
             <div key={id} className="flex flex-col space-y-2">
@@ -75,7 +75,7 @@ export const SettingsPanel = ({
                 <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${settings.audioMode === id ? 'border-rose-500' : 'border-slate-300'}`}>
                   {settings.audioMode === id && <div className="w-2.5 h-2.5 bg-rose-500 rounded-full" />}
                 </div>
-                <DT tKey={tk} settings={settings} flexCol={false} spanClass={`font-medium text-sm ${settings.audioMode === id ? 'text-rose-700' : 'text-slate-600'}`} />
+                <DT tKey={tk} settings={settings} flexCol={false} spanClass={`font-medium text-sm ${settings.audioMode === id ? 'text-rose-700' : 'text-slate-900'}`} />
               </label>
               
               {id === 'repeat' && settings.audioMode === 'repeat' && (
@@ -99,8 +99,8 @@ export const SettingsPanel = ({
         {[['showRomaji','sr','srD'],['showJpSubtext','sj','sjD']].map(([field, tk, descTk]) => (
           <div key={field} className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex items-center justify-between transition-all hover:border-rose-200">
             <div className="flex-grow">
-              <DT tKey={tk} settings={settings} spanClass="font-bold text-slate-700 leading-tight" />
-              <DT tKey={descTk} settings={settings} spanClass="text-xs text-slate-500 mt-1" />
+              <DT tKey={tk} settings={settings} spanClass="font-bold text-slate-950 leading-tight" />
+              <DT tKey={descTk} settings={settings} spanClass="text-xs text-slate-800 mt-1" />
             </div>
             <button onClick={() => setSettings({...settings, [field]: !settings[field]})}
               className={`w-14 h-7 rounded-full relative transition-colors flex-shrink-0 ${settings[field] ? 'bg-green-500' : 'bg-slate-300'}`}>
@@ -119,8 +119,8 @@ export const SettingsPanel = ({
                 <Download size={24} />
               </div>
               <div className="flex flex-col">
-                <h3 className="font-bold text-slate-800 text-lg leading-tight"><DT tKey="pwaTitle" settings={settings} flexCol={false} /></h3>
-                <p className="text-xs text-slate-500 mt-0.5"><DT tKey="pwaSub" settings={settings} flexCol={false} /></p>
+                <h3 className="font-bold text-slate-950 text-lg leading-tight"><DT tKey="pwaTitle" settings={settings} flexCol={false} /></h3>
+                <p className="text-xs text-slate-800 mt-0.5"><DT tKey="pwaSub" settings={settings} flexCol={false} /></p>
               </div>
             </div>
 
@@ -135,7 +135,7 @@ export const SettingsPanel = ({
                   <Share size={18} />
                   <DT tKey={isIos() ? 'pwaIos' : 'pwaTitle'} settings={settings} flexCol={false} />
                 </div>
-                <div className="text-sm text-slate-600 leading-relaxed font-medium bg-rose-50/50 p-3 rounded-xl">
+                <div className="text-sm text-slate-900 leading-relaxed font-medium bg-rose-50/50 p-3 rounded-xl">
                   <DT tKey="pwaIosStep" settings={settings} flexCol={false} />
                 </div>
               </div>
@@ -148,14 +148,14 @@ export const SettingsPanel = ({
       <div className="mt-4 pt-4 border-t border-slate-100 mb-10">
         <div className="bg-slate-100 rounded-3xl p-6 border-2 border-slate-200">
           <div className="flex flex-col">
-            <h3 className="font-bold text-slate-700 text-sm leading-tight mb-1">
+            <h3 className="font-bold text-slate-950 text-sm leading-tight mb-1">
               <DT tKey="clearCache" settings={settings} flexCol={false} />
             </h3>
-            <button onClick={clearCacheAndRestart} className="w-full mt-3 py-3 bg-white border-2 border-slate-200 text-slate-500 font-bold rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-slate-50 hover:text-rose-500 hover:border-rose-200">
+            <button onClick={clearCacheAndRestart} className="w-full mt-3 py-3 bg-white border-2 border-slate-200 text-slate-800 font-bold rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-slate-50 hover:text-rose-500 hover:border-rose-200">
               <RotateCcw size={16} />
               <DT tKey="clearCacheBtn" settings={settings} flexCol={false} spanClass="text-xs" />
             </button>
-            <p className="mt-2 text-[0.7rem] text-slate-400 leading-tight">
+            <p className="mt-2 text-[0.7rem] text-slate-600 leading-tight">
               <DT tKey="clearCacheSub" settings={settings} flexCol={false} />
             </p>
           </div>

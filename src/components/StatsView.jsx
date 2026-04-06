@@ -21,8 +21,8 @@ export const StatsView = ({ srsData, settings, t }) => {
   return (
     <div className="flex flex-col flex-grow">
       <div className="flex justify-between items-center mb-4 pb-2 border-b-2 border-slate-200">
-        <DT tKey="ch" settings={settings} spanClass="font-bold text-slate-700 leading-tight" />
-        <div className="flex gap-6 text-sm font-bold text-slate-500">
+        <DT tKey="ch" settings={settings} spanClass="font-bold text-slate-950 leading-tight" />
+        <div className="flex gap-6 text-sm font-bold text-slate-800">
           <DT tKey="mk" settings={settings} className="w-16 items-center" />
           <DT tKey="nr" settings={settings} className="w-24 items-end" />
         </div>
@@ -32,15 +32,15 @@ export const StatsView = ({ srsData, settings, t }) => {
         {getSortedStats().map((item, index) => (
           <div key={index} className="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="text-xl font-bold text-slate-800 w-8">{item.hiragana}</div>
-              <div className="text-xl text-slate-600 w-8">{item.katakana}</div>
-              <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">{item.romaji}</div>
+              <div className="text-xl font-bold text-slate-950 w-8">{item.hiragana}</div>
+              <div className="text-xl text-slate-900 w-8">{item.katakana}</div>
+              <div className="text-xs text-slate-600 uppercase tracking-widest font-bold">{item.romaji}</div>
             </div>
             <div className="flex gap-6 items-center">
               <div className={`w-16 text-center font-bold text-lg ${item.mistakes > 0 ? 'text-red-500 bg-red-50 py-1 rounded-lg' : 'text-slate-300'}`}>
                 {item.mistakes > 0 ? item.mistakes : '-'}
               </div>
-              <div className={`w-24 text-right text-xs font-medium ${(!item.nextReview || item.nextReview <= Date.now()) ? 'text-green-600 font-bold' : 'text-slate-400'}`}>
+              <div className={`w-24 text-right text-xs font-medium ${(!item.nextReview || item.nextReview <= Date.now()) ? 'text-green-600 font-bold' : 'text-slate-600'}`}>
                 {getReviewText(item.nextReview)}
               </div>
             </div>

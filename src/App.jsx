@@ -215,10 +215,10 @@ export default function App() {
   };
 
   const getButtonStyle = (option) => {
-    if (!selectedAnswer) return 'bg-white hover:bg-rose-50 text-slate-700 border-2 border-slate-200 hover:border-rose-300';
+    if (!selectedAnswer) return 'bg-white hover:bg-rose-50 text-slate-950 border-2 border-slate-200 hover:border-rose-300';
     if (option.romaji === currentQuestion.romaji) return 'bg-green-100 text-green-800 border-2 border-green-500 scale-105 shadow-md';
     if (option.romaji === selectedAnswer.romaji) return 'bg-red-100 text-red-800 border-2 border-red-400 opacity-70';
-    return 'bg-white text-slate-400 border-2 border-slate-100 opacity-50';
+    return 'bg-white text-slate-600 border-2 border-slate-100 opacity-50';
   };
 
   // ─── 標題對照 ───
@@ -276,8 +276,8 @@ export default function App() {
               <div className="flex justify-between items-center mb-4 flex-shrink-0 bg-white p-2.5 rounded-2xl shadow-sm border border-slate-100">
                 <div className="flex items-center">
                   <span className="px-2 border-r-2 border-slate-100 pr-4">
-                    <DT tKey="mode" flexCol={false} spanClass="text-[0.65rem] text-slate-400 font-bold mb-0.5 block" />
-                    <span className="text-sm font-bold text-slate-700 leading-none">
+                    <DT tKey="mode" flexCol={false} spanClass="text-[0.65rem] text-slate-600 font-bold mb-0.5 block" />
+                    <span className="text-sm font-bold text-slate-950 leading-none">
                       {mode === 'recognition' ? (settings.targetKana === 'hira' ? '平→片' : '片→平') : 
                        mode === 'audio-to-kana' ? '聽音' : mode === 'romaji-to-kana' ? '羅→假片' : mode === 'kana-to-romaji' ? '假片→羅' : mode === 'typing' ? '拼寫' : mode}
                     </span>
@@ -285,17 +285,17 @@ export default function App() {
                   <div className="flex gap-4 px-4">
                     {['tot', 'corCount', 'wrgCount'].map((key, i) => {
                       const val = dailyStats[getTodayKey()]?.[(i === 0 ? 'total' : i === 1 ? 'correct' : 'wrong')] || 0;
-                      const colors = ['text-slate-700', 'text-green-600', 'text-red-500'];
+                      const colors = ['text-slate-950', 'text-green-600', 'text-red-500'];
                       return (
                         <div key={key} className="flex flex-col items-center">
-                          <DT tKey={key} flexCol={false} spanClass={`text-[0.65rem] font-bold mb-0.5 ${i === 1 ? 'text-green-500/80' : i === 2 ? 'text-red-400' : 'text-slate-400'}`} />
+                          <DT tKey={key} flexCol={false} spanClass={`text-[0.65rem] font-bold mb-0.5 ${i === 1 ? 'text-green-500/80' : i === 2 ? 'text-red-400' : 'text-slate-600'}`} />
                           <span className={`text-sm font-bold leading-none ${colors[i]}`}>{val}</span>
                         </div>
                       );
                     })}
                   </div>
                 </div>
-                <button onClick={() => setShowQuickSettings(!showQuickSettings)} className={`p-2 rounded-xl transition-colors ${showQuickSettings ? 'bg-rose-100 text-rose-600' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
+                <button onClick={() => setShowQuickSettings(!showQuickSettings)} className={`p-2 rounded-xl transition-colors ${showQuickSettings ? 'bg-rose-100 text-rose-600' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}>
                   <Settings2 size={20} />
                 </button>
               </div>
@@ -304,14 +304,14 @@ export default function App() {
               {showQuickSettings && (
                 <div className="absolute top-14 left-0 right-0 z-[60] bg-white border-2 border-rose-100 rounded-3xl shadow-2xl p-5 m-2 animate-in fade-in zoom-in duration-200">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-slate-700 flex items-center gap-2"><Settings2 size={16} /> <DT tKey="setTitle" flexCol={false} /></h3>
-                    <button onClick={() => setShowQuickSettings(false)} className="p-1 hover:bg-slate-100 rounded-full text-slate-400"><X size={20} /></button>
+                    <h3 className="font-bold text-slate-950 flex items-center gap-2"><Settings2 size={16} /> <DT tKey="setTitle" flexCol={false} /></h3>
+                    <button onClick={() => setShowQuickSettings(false)} className="p-1 hover:bg-slate-100 rounded-full text-slate-600"><X size={20} /></button>
                   </div>
                   <div className="space-y-6">
                     {/* 錯誤提示時間 */}
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <DT tKey="ed" spanClass="text-sm font-bold text-slate-600" />
+                        <DT tKey="ed" spanClass="text-sm font-bold text-slate-900" />
                         <span className="text-sm font-black text-rose-500">{settings.errorDisplayTime === 0 ? t('manual') : `${settings.errorDisplayTime}s`}</span>
                       </div>
                       <input type="range" min="0" max="10" step="1" value={settings.errorDisplayTime}
@@ -332,11 +332,11 @@ export default function App() {
                     )}
                     {/* 測驗目標切換 (快速設定中) */}
                     <div className="pt-2 border-t border-slate-50">
-                        <div className="text-sm font-bold text-slate-600 mb-2"><DT tKey="tgtTitle" flexCol={false} /></div>
+                        <div className="text-sm font-bold text-slate-900 mb-2"><DT tKey="tgtTitle" flexCol={false} /></div>
                         <div className="flex bg-slate-100 p-1 rounded-xl">
                           {['hira', 'kata'].map(t => (
                             <button key={t} onClick={() => setSettings({ ...settings, targetKana: t })}
-                              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${settings.targetKana === t ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+                              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${settings.targetKana === t ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>
                               <DT tKey={t === 'hira' ? 'tgtHira' : 'tgtKata'} flexCol={false} />
                             </button>
                           ))}
@@ -364,7 +364,7 @@ export default function App() {
                 )}
 
                 {mode !== 'audio-to-kana' && (
-                  <div className={`${mode === 'romaji-to-kana' ? 'text-[4.5rem] uppercase tracking-widest text-indigo-600' : 'text-[4.5rem] sm:text-[5rem] text-slate-800'} font-bold leading-none mt-4 mb-2`}>
+                  <div className={`${mode === 'romaji-to-kana' ? 'text-[4.5rem] uppercase tracking-widest text-indigo-600' : 'text-[4.5rem] sm:text-[5rem] text-slate-950'} font-bold leading-none mt-4 mb-2`}>
                     {mode === 'hira-to-kata' ? currentQuestion.hiragana :
                      mode === 'kata-to-hira' ? currentQuestion.katakana :
                      mode === 'romaji-to-kana' ? currentQuestion.romaji :
@@ -373,7 +373,7 @@ export default function App() {
                 )}
 
                 {settings.showRomaji && mode !== 'romaji-to-kana' && mode !== 'kana-to-romaji' && mode !== 'typing' && (
-                   <div className="text-xl font-bold text-slate-400 mb-2 uppercase tracking-widest">{currentQuestion.romaji}</div>
+                   <div className="text-xl font-bold text-slate-600 mb-2 uppercase tracking-widest">{currentQuestion.romaji}</div>
                 )}
 
                 <div className="flex items-center gap-2 mt-2">
@@ -397,7 +397,7 @@ export default function App() {
                         <option value="">{t('defVoice')}</option>
                         {availableVoices.map((v, idx) => <option key={idx} value={v.voiceURI}>{v.name}</option>)}
                       </select>
-                      <button className="flex items-center justify-center p-2 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 transition-colors">
+                      <button className="flex items-center justify-center p-2 bg-slate-100 text-slate-800 rounded-full hover:bg-slate-200 transition-colors">
                         <Users size={18} />
                       </button>
                     </div>
@@ -405,7 +405,7 @@ export default function App() {
                 </div>
                 
                 {(mode === 'audio-to-kana' || (settings.showRomaji === false && (mode === 'hira-to-kata' || mode === 'kata-to-hira'))) && (
-                   <button onClick={() => setSettings({ ...settings, showRomaji: !settings.showRomaji })} className="mt-4 flex items-center gap-2 px-4 py-1.5 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 transition-colors active:scale-95 text-[0.75rem] font-bold">
+                   <button onClick={() => setSettings({ ...settings, showRomaji: !settings.showRomaji })} className="mt-4 flex items-center gap-2 px-4 py-1.5 bg-slate-100 text-slate-800 rounded-full hover:bg-slate-200 transition-colors active:scale-95 text-[0.75rem] font-bold">
                      {settings.showRomaji ? <EyeOff size={14} /> : <Eye size={14} />}
                      <DT tKey="sr" flexCol={false} />
                    </button>
@@ -445,7 +445,7 @@ export default function App() {
                       autoComplete="off"
                       autoCorrect="off"
                       spellCheck="false"
-                      className="w-full text-center text-3xl font-black p-4 border-2 border-slate-200 rounded-2xl focus:border-rose-400 focus:outline-none focus:ring-4 focus:ring-rose-100 disabled:opacity-50 text-slate-700 bg-white shadow-sm"
+                      className="w-full text-center text-3xl font-black p-4 border-2 border-slate-200 rounded-2xl focus:border-rose-400 focus:outline-none focus:ring-4 focus:ring-rose-100 disabled:opacity-50 text-slate-950 bg-white shadow-sm"
                     />
                     <button type="submit" disabled={isAnimating || !typingInput.trim()}
                       className="w-full bg-rose-500 text-white font-bold p-4 rounded-2xl disabled:bg-slate-300 disabled:cursor-not-allowed active:scale-95 transition-all text-lg shadow-sm">
@@ -485,7 +485,7 @@ export default function App() {
             <div className="grid grid-cols-2 gap-3 pb-4">
               {Object.entries(i18n).map(([code, dict]) => (
                 <button key={code} onClick={() => { setSettings({ ...settings, uiLang: code }); setGameState('idle'); }}
-                  className={`p-3 rounded-xl border-2 font-medium transition-all ${settings.uiLang === code ? 'bg-rose-100 border-rose-400 text-rose-700' : 'bg-white border-slate-200 text-slate-600 hover:border-rose-300'}`}>
+                  className={`p-3 rounded-xl border-2 font-medium transition-all ${settings.uiLang === code ? 'bg-rose-100 border-rose-400 text-rose-700' : 'bg-white border-slate-200 text-slate-900 hover:border-rose-300'}`}>
                   {dict.label}
                 </button>
               ))}
@@ -499,22 +499,22 @@ export default function App() {
               {/* 行選擇 */}
               <div className="mb-5">
                 <div className="flex justify-between items-center mb-3">
-                  <DT tKey="s1" className="items-start" spanClass="font-bold text-slate-700 text-base leading-tight" />
+                  <DT tKey="s1" className="items-start" spanClass="font-bold text-slate-950 text-base leading-tight" />
                   <div className="flex bg-slate-100 p-1 rounded-lg gap-1">
-                    <button onClick={() => setSelectedRows(rowDefs.map(r => r.id))} className="px-2 py-1 rounded text-xs font-bold text-slate-500 hover:text-rose-500 active:bg-white"><DT tKey="selAll" flexCol={false} /></button>
-                    <button onClick={() => setSelectedRows([])} className="px-2 py-1 rounded text-xs font-bold text-slate-500 hover:text-slate-700 active:bg-white"><DT tKey="deselAll" flexCol={false} /></button>
+                    <button onClick={() => setSelectedRows(rowDefs.map(r => r.id))} className="px-2 py-1 rounded text-xs font-bold text-slate-800 hover:text-rose-500 active:bg-white"><DT tKey="selAll" flexCol={false} /></button>
+                    <button onClick={() => setSelectedRows([])} className="px-2 py-1 rounded text-xs font-bold text-slate-800 hover:text-slate-950 active:bg-white"><DT tKey="deselAll" flexCol={false} /></button>
                   </div>
                 </div>
                 {rowGroups.map((group, gIdx) => (
                   <div key={gIdx} className="mb-3">
                     <div className="flex items-center gap-1.5 mb-2">
                       <div className={`w-1 h-3.5 rounded-full ${gIdx === 0 ? 'bg-rose-400' : 'bg-indigo-400'}`} />
-                      <DT tKey={group.tKey} flexCol={false} spanClass="text-xs font-bold text-slate-500" />
+                      <DT tKey={group.tKey} flexCol={false} spanClass="text-xs font-bold text-slate-800" />
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {group.items.map(row => (
                         <button key={row.id} onClick={() => setSelectedRows(p => p.includes(row.id) ? p.filter(id => id !== row.id) : [...p, row.id])}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedRows.includes(row.id) ? 'bg-rose-500 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-rose-300'}`}>
+                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedRows.includes(row.id) ? 'bg-rose-500 text-white' : 'bg-white border border-slate-200 text-slate-900 hover:border-rose-300'}`}>
                           <DT tKey={row.tKey} flexCol={false} />
                         </button>
                       ))}
@@ -526,22 +526,22 @@ export default function App() {
               {/* 段選擇 */}
               <div className="mb-5 pt-4 border-t border-slate-200">
                 <div className="flex justify-between items-center mb-3">
-                  <DT tKey="s2" className="items-start" spanClass="font-bold text-slate-700 text-base leading-tight" />
+                  <DT tKey="s2" className="items-start" spanClass="font-bold text-slate-950 text-base leading-tight" />
                   <div className="flex bg-slate-100 p-1 rounded-lg gap-1">
-                    <button onClick={() => setSelectedCols(colDefs.map(c => c.id))} className="px-2 py-1 rounded text-xs font-bold text-slate-500 hover:text-rose-500 active:bg-white"><DT tKey="selAll" flexCol={false} /></button>
-                    <button onClick={() => setSelectedCols([])} className="px-2 py-1 rounded text-xs font-bold text-slate-500 hover:text-slate-700 active:bg-white"><DT tKey="deselAll" flexCol={false} /></button>
+                    <button onClick={() => setSelectedCols(colDefs.map(c => c.id))} className="px-2 py-1 rounded text-xs font-bold text-slate-800 hover:text-rose-500 active:bg-white"><DT tKey="selAll" flexCol={false} /></button>
+                    <button onClick={() => setSelectedCols([])} className="px-2 py-1 rounded text-xs font-bold text-slate-800 hover:text-slate-950 active:bg-white"><DT tKey="deselAll" flexCol={false} /></button>
                   </div>
                 </div>
                 {colGroups.map((group, gIdx) => (
                   <div key={gIdx} className="mb-3">
                     <div className="flex items-center gap-1.5 mb-2">
                        <div className={`w-1 h-3.5 rounded-full ${gIdx === 0 ? 'bg-indigo-400' : 'bg-amber-400'}`} />
-                       <DT tKey={group.tKey} flexCol={false} spanClass="text-xs font-bold text-slate-500" />
+                       <DT tKey={group.tKey} flexCol={false} spanClass="text-xs font-bold text-slate-800" />
                     </div>
                     <div className="flex flex-wrap gap-2">
                        {group.items.map(col => (
                          <button key={col.id} onClick={() => setSelectedCols(p => p.includes(col.id) ? p.filter(id => id !== col.id) : [...p, col.id])}
-                           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedCols.includes(col.id) ? 'bg-indigo-500 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'}`}>
+                           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedCols.includes(col.id) ? 'bg-indigo-500 text-white' : 'bg-white border border-slate-200 text-slate-900 hover:border-indigo-300'}`}>
                            <DT tKey={col.tKey} flexCol={false} />
                          </button>
                        ))}
@@ -552,14 +552,14 @@ export default function App() {
 
               {/* 🎯 練習目標切換 (方案B) */}
               <div className="mb-6 pt-4 border-t border-slate-200">
-                 <div className="mb-2 text-sm font-bold text-slate-700 flex items-center justify-between">
+                 <div className="mb-2 text-sm font-bold text-slate-950 flex items-center justify-between">
                     <DT tKey="tgtTitle" flexCol={false} />
                     <span className="text-xs text-rose-500 font-bold bg-rose-50 px-2 py-0.5 rounded-full">{settings.targetKana === 'hira' ? 'あかさたな...' : 'アカサタナ...'}</span>
                  </div>
                  <div className="flex bg-slate-200/50 p-1 rounded-2xl border border-slate-100">
                     {['hira', 'kata'].map(t => (
                       <button key={t} onClick={() => setSettings({ ...settings, targetKana: t })}
-                        className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${settings.targetKana === t ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                        className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${settings.targetKana === t ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-800 hover:text-slate-950'}`}>
                         <Zap size={14} className={settings.targetKana === t ? 'text-rose-500' : 'text-slate-300'} />
                         <DT tKey={t === 'hira' ? 'tgtHira' : 'tgtKata'} flexCol={false} />
                       </button>
@@ -569,16 +569,16 @@ export default function App() {
 
               {/* 🚀 開始按鈕 */}
               <div className="mt-auto">
-                <div className="mb-3 text-sm font-bold text-slate-600"><DT tKey="s3" flexCol={false} spanClass="leading-tight" /></div>
+                <div className="mb-3 text-sm font-bold text-slate-900"><DT tKey="s3" flexCol={false} spanClass="leading-tight" /></div>
                 <div className="space-y-4">
                   {/* Basic */}
                   <div>
-                    <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest"><DT tKey="grpTestBasic" flexCol={false}/></div>
+                    <div className="text-xs font-bold text-slate-600 mb-2 uppercase tracking-widest"><DT tKey="grpTestBasic" flexCol={false}/></div>
                     <div className="grid grid-cols-1 gap-2">
                        <button onClick={() => startGame('recognition')} disabled={selectedRows.length === 0 && selectedCols.length === 0}
                          className={`w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm'}`}>
                          <div className="flex flex-col items-start translate-y-[-1px]">
-                            <span className="text-[1rem] font-bold text-slate-700 leading-tight">
+                            <span className="text-[1rem] font-bold text-slate-950 leading-tight">
                                {t(settings.targetKana === 'hira' ? 'mH2K' : 'mK2H')}
                             </span>
                          </div>
@@ -586,7 +586,7 @@ export default function App() {
                        </button>
                        <button onClick={() => startGame('audio-to-kana')} disabled={selectedRows.length === 0 && selectedCols.length === 0}
                          className={`w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm'}`}>
-                         <DT tKey="mAudio2Kana" className="items-start" spanClass="text-[1rem] font-bold text-slate-700 leading-tight" jpClassName="text-[0.6rem] text-slate-400 mt-0.5" />
+                         <DT tKey="mAudio2Kana" className="items-start" spanClass="text-[1rem] font-bold text-slate-950 leading-tight" jpClassName="text-[0.6rem] text-slate-600 mt-0.5" />
                          <Volume2 size={18} className="text-slate-300 group-hover:text-rose-500" />
                        </button>
                     </div>
@@ -594,7 +594,7 @@ export default function App() {
                   
                   {/* Advanced */}
                   <div>
-                    <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest"><DT tKey="grpTestAdv" flexCol={false}/></div>
+                    <div className="text-xs font-bold text-slate-600 mb-2 uppercase tracking-widest"><DT tKey="grpTestAdv" flexCol={false}/></div>
                     <div className="grid grid-cols-1 gap-2">
                       {[
                         { id: 'romaji-to-kana', tk: 'mRomaji2Kana', icon: KeyRound },
@@ -603,7 +603,7 @@ export default function App() {
                       ].map(m => (
                         <button key={m.id} onClick={() => startGame(m.id)} disabled={selectedRows.length === 0 && selectedCols.length === 0}
                           className={`w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-sm'}`}>
-                          <DT tKey={m.tk} className="items-start" spanClass="text-[1rem] font-bold text-slate-700 leading-tight" jpClassName="text-[0.6rem] text-slate-400 mt-0.5" />
+                          <DT tKey={m.tk} className="items-start" spanClass="text-[1rem] font-bold text-slate-950 leading-tight" jpClassName="text-[0.6rem] text-slate-600 mt-0.5" />
                           <m.icon size={18} className="text-slate-300 group-hover:text-indigo-500" />
                         </button>
                       ))}

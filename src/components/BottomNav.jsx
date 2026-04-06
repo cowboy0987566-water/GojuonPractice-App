@@ -31,13 +31,13 @@ export const BottomNav = ({ activeTab, onTabChange, t, uiLang }) => {
               key={id}
               onClick={() => onTabChange(id)}
               className={`flex-1 flex flex-col items-center justify-center py-2.5 px-1 gap-1 transition-all relative
-                ${isActive ? 'text-rose-600' : 'text-slate-400 hover:text-slate-600 active:text-rose-500'}`}
+                ${isActive ? 'text-rose-600' : 'text-slate-600 hover:text-slate-900 active:text-rose-500'}`}
             >
               {isActive && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-rose-500 rounded-full" />
               )}
               <Icon size={22} className={`transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`text-[0.6rem] font-bold leading-none tracking-wide ${isActive ? 'text-rose-600' : 'text-slate-400'}`}>
+              <span className={`text-[0.6rem] font-bold leading-none tracking-wide ${isActive ? 'text-rose-600' : 'text-slate-600'}`}>
                 {label}
               </span>
             </button>
