@@ -155,6 +155,9 @@ export const SettingsPanel = ({
               <RotateCcw size={16} />
               <DT tKey="clearCacheBtn" settings={settings} flexCol={false} spanClass="text-xs" />
             </button>
+            <p className="mt-2 text-[0.7rem] text-slate-400 leading-tight">
+              <DT tKey="clearCacheSub" settings={settings} flexCol={false} />
+            </p>
           </div>
         </div>
       </div>
