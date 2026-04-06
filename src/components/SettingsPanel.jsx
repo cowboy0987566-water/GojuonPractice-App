@@ -94,11 +94,11 @@ export const SettingsPanel = ({
         </div>
       </div>
 
-      {/* 羅馬拼音 / 日文翻譯 切換 */}
+      {/* 顯示設定開關 */}
       <div className="space-y-4">
-        {[['showRomaji','sr','srD'],['showJpSubtext','sj','sjD']].map(([field, tk, descTk]) => (
+        {[['showRomaji','sr','srD'],['showJpSubtext','sj','sjD'],['keepCustomOpen','keepCustomOpen','keepCustomOpenD']].map(([field, tk, descTk]) => (
           <div key={field} className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex items-center justify-between transition-all hover:border-rose-200">
-            <div className="flex-grow">
+            <div className="flex-grow pr-4">
               <DT tKey={tk} settings={settings} spanClass="font-bold text-slate-950 leading-tight" />
               <DT tKey={descTk} settings={settings} spanClass="text-xs text-slate-800 mt-1" />
             </div>

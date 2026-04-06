@@ -44,9 +44,33 @@ export default function App() {
     try {
       const saved = localStorage.getItem('gojuon_settings_v1');
       const parsed = saved ? JSON.parse(saved) : {};
-      return { showRomaji: false, errorDisplayTime: 3, audioMode: 'auto', audioInterval: 3, uiLang: 'zh-TW', showJpSubtext: false, selectedVoiceURI: '', targetKana: 'hira', ...parsed };
-    } catch { return { showRomaji: false, errorDisplayTime: 3, audioMode: 'auto', audioInterval: 3, uiLang: 'zh-TW', showJpSubtext: false, selectedVoiceURI: '', targetKana: 'hira' }; }
+      return { showRomaji: false, errorDisplayTime: 3, audioMode: 'auto', audioInterval: 3, uiLang: 'zh-TW', showJpSubtext: false, selectedVoiceURI: '', targetKana: 'hira', keepCustomOpen: false, ...parsed };
+    } catch { return { showRomaji: false, errorDisplayTime: 3, audioMode: 'auto', audioInterval: 3, uiLang: 'zh-TW', showJpSubtext: false, selectedVoiceURI: '', targetKana: 'hira', keepCustomOpen: false }; }
   });
+
+  const [isCustomOpen, setIsCustomOpen] = useState(settings.keepCustomOpen);
+
+  const applyPreset = (preset) => {
+    switch (preset) {
+      case 'basic':
+        setSelectedRows(['rowA','rowKa','rowSa','rowTa','rowNa','rowHa','rowMa','rowYa','rowRa','rowWa']);
+        setSelectedCols(['colA','colI','colU','colE','colO','colN']);
+        break;
+      case 'dakuon':
+        setSelectedRows(['rowDakuon','rowHandakuon']);
+        setSelectedCols(['colA','colI','colU','colE','colO']);
+        break;
+      case 'yoon':
+        setSelectedRows(['rowYoon']);
+        setSelectedCols(['colYa','colYu','colYo']);
+        break;
+      case 'all':
+        setSelectedRows(rowDefs.map(r => r.id));
+        setSelectedCols(colDefs.map(c => c.id));
+        break;
+    }
+    if (!settings.keepCustomOpen) setIsCustomOpen(false);
+  };
 
   useEffect(() => { localStorage.setItem('gojuon_settings_v1', JSON.stringify(settings)); }, [settings]);
 
@@ -496,7 +520,41 @@ export default function App() {
           {!isPlaying && !isLangPicker && activeTab === 'menu' && (
             <div className="flex flex-col flex-grow">
 
-              {/* 行選擇 */}
+              {/* 🎯 快速預設 */}
+              <div className="mb-4">
+                 <div className="mb-2 text-sm font-bold text-slate-950 flex items-center justify-between">
+                    <DT tKey="presetTitle" flexCol={false} />
+                 </div>
+                 <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => applyPreset('basic')} className="py-3 bg-white border-2 border-slate-200 text-slate-800 font-bold rounded-xl active:scale-95 transition-all hover:border-rose-400 hover:text-rose-600 shadow-sm text-sm sm:text-base">
+                       <DT tKey="presetBasic" flexCol={false} />
+                    </button>
+                    <button onClick={() => applyPreset('dakuon')} className="py-3 bg-white border-2 border-slate-200 text-slate-800 font-bold rounded-xl active:scale-95 transition-all hover:border-rose-400 hover:text-rose-600 shadow-sm text-sm sm:text-base">
+                       <DT tKey="presetDaku" flexCol={false} />
+                    </button>
+                    <button onClick={() => applyPreset('yoon')} className="py-3 bg-white border-2 border-slate-200 text-slate-800 font-bold rounded-xl active:scale-95 transition-all hover:border-rose-400 hover:text-rose-600 shadow-sm text-sm sm:text-base">
+                       <DT tKey="presetYoon" flexCol={false} />
+                    </button>
+                    <button onClick={() => applyPreset('all')} className="py-3 bg-white border-2 border-slate-200 text-slate-800 font-bold rounded-xl active:scale-95 transition-all hover:border-rose-400 hover:text-rose-600 shadow-sm text-sm sm:text-base">
+                       <DT tKey="presetAll" flexCol={false} />
+                    </button>
+                 </div>
+              </div>
+
+              {/* 🛠️ 進階自訂範圍 折疊區 */}
+              <div className="mb-5 bg-white border-2 border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+                 <button onClick={() => setIsCustomOpen(!isCustomOpen)} className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center gap-2">
+                       <DT tKey="customRange" flexCol={false} spanClass="font-bold text-slate-800 text-sm" />
+                    </div>
+                    <div className="text-slate-400">
+                       {isCustomOpen ? <ChevronLeft size={18} className="-rotate-90 transition-transform" /> : <ChevronLeft size={18} className="rotate-180 transition-transform" />}
+                    </div>
+                 </button>
+                 
+                 {isCustomOpen && (
+                   <div className="p-4 border-t border-slate-100 animate-in slide-in-from-top-2 duration-200">
+                     {/* 行選擇 */}
               <div className="mb-5">
                 <div className="flex justify-between items-center mb-3">
                   <DT tKey="s1" className="items-start" spanClass="font-bold text-slate-950 text-base leading-tight" />
@@ -549,6 +607,9 @@ export default function App() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+          </div>
 
               {/* 🎯 練習目標切換 (方案B) */}
               <div className="mb-6 pt-4 border-t border-slate-200">
