@@ -14,6 +14,7 @@ import { DT } from './components/DT';
 import { GojuonTable } from './components/GojuonTable';
 import { StatsView } from './components/StatsView';
 import { LearningCalendar } from './components/LearningCalendar';
+import { SettingsPanel } from './components/SettingsPanel';
 
 export default function App() {
   // ─── 狀態管理 ───
@@ -34,7 +35,6 @@ export default function App() {
   const [tableDisplay, setTableDisplay] = useState({ hiragana: true, katakana: true, romaji: true, stats: false });
   const [showQuickSettings, setShowQuickSettings] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [calMonth, setCalMonth] = useState(new Date());
   const [selDateStr, setSelDateStr] = useState(getTodayKey());
 
   const { srsData, setSrsData, updateSRS } = useSRS();
@@ -220,72 +220,6 @@ export default function App() {
     if (option.romaji === selectedAnswer.romaji) return 'bg-red-100 text-red-800 border-2 border-red-400 opacity-70';
     return 'bg-white text-slate-400 border-2 border-slate-100 opacity-50';
   };
-
-  // ─── 五十音表 KanaCell ───
-  const KanaCell = ({ romajiKey }) => {
-    if (!romajiKey) return <div className="p-1" />;
-    const kana = kanaData.find(k => k.romaji === romajiKey);
-    if (!kana) return <div className="p-1" />;
-    const stats = srsData[romajiKey] || { mistakes: 0, corrects: 0 };
-    return (
-      <button onClick={() => playAudio(kana.katakana)} className="flex flex-col items-center justify-center p-2 bg-white rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50 shadow-sm transition-all active:scale-95 min-h-[4rem]">
-        {tableDisplay.hiragana && <span className="text-xl font-bold text-slate-800 leading-tight">{kana.hiragana}</span>}
-        {tableDisplay.katakana && <span className="text-xl font-bold text-slate-600 leading-tight">{kana.katakana}</span>}
-        {tableDisplay.romaji && <span className="text-[0.65rem] text-slate-400 font-bold uppercase mt-1 tracking-wider">{kana.romaji}</span>}
-        {tableDisplay.stats && (
-          <div className="flex gap-1 mt-1 w-full justify-center">
-            <div className="flex items-center gap-0.5 bg-green-50 text-green-600 px-1 py-0.5 rounded text-[0.6rem] font-bold border border-green-100"><CheckCircle2 size={10} /><span>{stats.corrects || 0}</span></div>
-            <div className="flex items-center gap-0.5 bg-red-50 text-red-500 px-1 py-0.5 rounded text-[0.6rem] font-bold border border-red-100"><XCircle size={10} /><span>{stats.mistakes || 0}</span></div>
-          </div>
-        )}
-      </button>
-    );
-  };
-
-  // ─── 日曆 ───
-  const renderCalendarDays = () => {
-    const daysInMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 0).getDate();
-    const firstDayIndex = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1).getDay();
-    const todayStr = getTodayKey();
-    const days = [];
-    for (let i = 0; i < firstDayIndex; i++) days.push(<div key={`e-${i}`} className="p-1" />);
-    for (let i = 1; i <= daysInMonth; i++) {
-      const dateStr = `${calMonth.getFullYear()}-${String(calMonth.getMonth() + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-      const stats = dailyStats[dateStr];
-      const hasData = stats && stats.total > 0;
-      const isSelected = selDateStr === dateStr;
-      const isToday = todayStr === dateStr;
-      days.push(
-        <button key={`d-${i}`} onClick={() => setSelDateStr(dateStr)}
-          className={`relative p-1 rounded-xl text-sm font-bold flex flex-col items-center justify-start transition-all min-h-[4rem] pt-1.5
-            ${isSelected ? 'bg-rose-500 text-white shadow-md' : 'hover:bg-slate-100 text-slate-700'}
-            ${isToday && !isSelected ? 'border-2 border-rose-400 text-rose-600' : 'border-2 border-transparent'}`}>
-          <span className="leading-none mb-1">{i}</span>
-          {hasData && (
-            <div className="flex flex-col w-full gap-[3px] px-0.5 mt-auto mb-0.5">
-              <div className={`text-[0.55rem] w-full text-center rounded py-[1.5px] font-bold ${isSelected ? 'bg-rose-600/50 text-rose-100' : 'bg-slate-200/60 text-slate-500'}`}>{stats.total}</div>
-              <div className={`text-[0.55rem] w-full text-center rounded py-[1.5px] font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-red-100/60 text-red-500'}`}>{stats.wrong}</div>
-            </div>
-          )}
-        </button>
-      );
-    }
-    return days;
-  };
-
-  // ─── 統計 ───
-  const getReviewText = (nextReview) => {
-    if (!nextReview) return t('nl');
-    const h = (nextReview - Date.now()) / 3600000;
-    if (h <= 0) return t('tr');
-    if (h < 24) return `${t('ab')} ${Math.ceil(h)} ${t('hl')}`;
-    return `${t('ab')} ${Math.ceil(h / 24)} ${t('dl')}`;
-  };
-
-  const getSortedStats = () =>
-    kanaData.filter(k => k.romaji !== 'xtsu').map(kana => ({
-      ...kana, ...(srsData[kana.romaji] || { mistakes: 0, corrects: 0, nextReview: 0, rep: 0 })
-    })).sort((a, b) => b.mistakes - a.mistakes || a.nextReview - b.nextReview);
 
   // ─── 標題對照 ───
   const headerTitle = {
@@ -678,7 +612,7 @@ export default function App() {
                   <div>
                     <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest"><DT tKey="grpTestAdv" flexCol={false}/></div>
                     <div className="grid grid-cols-1 gap-2">
-                       {[
+                      {[
                         { id: 'romaji-to-kana', tk: 'mRomaji2Kana', icon: KeyRound },
                         { id: 'kana-to-romaji', tk: 'mKana2Romaji', icon: KeyRound },
                         { id: 'typing', tk: 'mTyping', icon: Edit2 } 
@@ -698,220 +632,49 @@ export default function App() {
 
           {/* ─── Tab: 日曆 ─── */}
           {!isPlaying && !isLangPicker && activeTab === 'calendar' && (
-            <div className="flex flex-col flex-grow">
-              <div className="flex justify-between items-center bg-white p-3 rounded-2xl shadow-sm border border-slate-100 mb-4">
-                <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1))} className="p-2 hover:bg-slate-100 rounded-full text-slate-500"><ChevronLeft size={20} /></button>
-                <span className="font-bold text-slate-700">{calMonth.getFullYear()} - {String(calMonth.getMonth() + 1).padStart(2, '0')}</span>
-                <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))} className="p-2 hover:bg-slate-100 rounded-full text-slate-500"><ChevronRight size={20} /></button>
-              </div>
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-4">
-                <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-2">
-                  {['SUN','MON','TUE','WED','THU','FRI','SAT'].map(d => <div key={d}>{d}</div>)}
-                </div>
-                <div className="grid grid-cols-7 gap-1">{renderCalendarDays()}</div>
-              </div>
-              {selDateStr && dailyStats[selDateStr] && (
-                <div className="bg-white p-5 rounded-2xl shadow-sm border-2 border-rose-100 relative overflow-hidden flex flex-col">
-                  <div className="absolute top-0 left-0 w-2 h-full bg-rose-400" />
-                  <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2"><CalendarDays size={18} className="text-rose-500" />{selDateStr}</h3>
-                  <div className="flex gap-3">
-                    {[['tot', 'total', 'bg-slate-50 border-slate-100 text-slate-700'],['corCount','correct','bg-green-50 border-green-100 text-green-600'],['wrgCount','wrong','bg-red-50 border-red-100 text-red-500']].map(([tk, field, cls]) => (
-                      <div key={tk} className={`flex flex-col items-center py-3 rounded-2xl flex-1 border ${cls}`}>
-                        <DT tKey={tk} spanClass={`text-xs font-bold mb-1 ${cls.split(' ')[2]}`} />
-                        <span className={`text-3xl font-black leading-none ${cls.split(' ')[2]}`}>{dailyStats[selDateStr][field] || 0}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {dailyStats[selDateStr].wrongChars?.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-rose-100">
-                      <div className="flex items-center gap-1.5 mb-3"><XCircle size={16} className="text-rose-500" />
-                        <DT tKey="todayMistakes" flexCol={false} spanClass="text-sm font-bold text-slate-700" />
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {dailyStats[selDateStr].wrongChars.map(romaji => {
-                          const kana = kanaData.find(k => k.romaji === romaji);
-                          if (!kana) return null;
-                          return (
-                            <button key={romaji} onClick={() => playAudio(kana.katakana)}
-                              className="flex items-center bg-white border border-red-200 pl-2.5 pr-2 py-1.5 rounded-lg hover:bg-red-50 shadow-sm active:scale-95">
-                              <span className="text-[1.1rem] font-bold text-slate-700">{kana.hiragana}</span>
-                              <span className="text-slate-300 mx-1.5 text-xs">/</span>
-                              <span className="text-[1.1rem] font-bold text-slate-600">{kana.katakana}</span>
-                              <Volume2 size={14} className="text-red-300 ml-2" />
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            <LearningCalendar
+              dailyStats={dailyStats}
+              selDateStr={selDateStr}
+              setSelDateStr={setSelDateStr}
+              settings={settings}
+              t={t}
+              playAudio={playAudio}
+            />
           )}
 
           {/* ─── Tab: 五十音表 ─── */}
           {!isPlaying && !isLangPicker && activeTab === 'table' && (
-            <div className="flex flex-col flex-grow">
-              <div className="flex flex-wrap justify-center gap-2 mb-5 p-2 bg-white rounded-2xl shadow-sm border border-slate-100">
-                {[['hiragana','tbHira','bg-rose-100 text-rose-700'],['katakana','tbKata','bg-indigo-100 text-indigo-700'],['romaji','tbRoma','bg-amber-100 text-amber-700'],['stats','tbStats','bg-emerald-100 text-emerald-700']].map(([key, tk, activeCls]) => (
-                  <button key={key} onClick={() => setTableDisplay(p => ({...p, [key]: !p[key]}))}
-                    className={`px-3 py-2 rounded-xl text-sm font-bold transition-all ${tableDisplay[key] ? activeCls + ' shadow-inner' : 'text-slate-400 hover:bg-slate-100'}`}>
-                    <DT tKey={tk} flexCol={false} spanClass="leading-tight" />
-                  </button>
-                ))}
-              </div>
-              {[['grpBasic', tableLayout.seion, 'bg-rose-400', 'grid-cols-5'],['grpDaku', tableLayout.dakuon, 'bg-indigo-400', 'grid-cols-5'],['grpYoon', tableLayout.yoon, 'bg-amber-400', 'grid-cols-3'],['grpSoku', tableLayout.sokuon, 'bg-emerald-400', 'grid-cols-5']].map(([tk, layout, color, cols]) => (
-                <div key={tk} className="mb-5">
-                  <div className="flex items-center gap-2 mb-3"><div className={`h-4 w-1 ${color} rounded-full`}></div><DT tKey={tk} flexCol={false} spanClass="font-bold text-slate-700" /></div>
-                  <div className={`grid ${cols} gap-1.5 ${tk === 'grpYoon' ? 'max-w-[70%]' : ''}`}>
-                    {layout.map((row, rIdx) => row.map((col, cIdx) => <KanaCell key={`${tk}-${rIdx}-${cIdx}`} romajiKey={col} />))}
-                  </div>
-                </div>
-              ))}
-              <div className="text-center text-xs text-slate-400 mt-2 pb-4 flex items-center justify-center gap-1"><Volume2 size={12} /> {t('pa')}</div>
-            </div>
+            <GojuonTable
+              srsData={srsData}
+              tableDisplay={tableDisplay}
+              setTableDisplay={setTableDisplay}
+              playAudio={playAudio}
+              settings={settings}
+            />
           )}
 
           {/* ─── Tab: 錯題本 ─── */}
           {!isPlaying && !isLangPicker && activeTab === 'stats' && (
-            <div className="flex flex-col flex-grow">
-              <div className="flex justify-between items-center mb-4 pb-2 border-b-2 border-slate-200">
-                <DT tKey="ch" spanClass="font-bold text-slate-700" />
-                <div className="flex gap-6">
-                  <DT tKey="mk" className="w-16 items-center" spanClass="font-bold text-slate-500 text-sm" />
-                  <DT tKey="nr" className="w-24 items-end" spanClass="font-bold text-slate-500 text-sm" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                {getSortedStats().map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="text-xl font-bold text-slate-800 w-8">{item.hiragana}</div>
-                      <div className="text-xl text-slate-600 w-8">{item.katakana}</div>
-                      <div className="text-xs text-slate-400 uppercase tracking-widest font-bold">{item.romaji}</div>
-                    </div>
-                    <div className="flex gap-6 items-center">
-                      <div className={`w-16 text-center font-bold text-lg ${item.mistakes > 0 ? 'text-red-500 bg-red-50 py-1 rounded-lg' : 'text-slate-300'}`}>{item.mistakes > 0 ? item.mistakes : '-'}</div>
-                      <div className={`w-24 text-right text-xs font-medium ${(!item.nextReview || item.nextReview <= Date.now()) ? 'text-green-600 font-bold' : 'text-slate-400'}`}>{getReviewText(item.nextReview)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <StatsView
+              srsData={srsData}
+              settings={settings}
+              t={t}
+            />
           )}
 
           {/* ─── Tab: 設定 ─── */}
           {!isPlaying && !isLangPicker && activeTab === 'settings' && (
-            <div className="flex flex-col flex-grow space-y-5">
-              {/* 語言選擇快捷 */}
-              <div className="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Globe size={20} className="text-rose-500" />
-                  <DT tKey="langBtn" spanClass="font-bold text-slate-700" />
-                </div>
-                <button onClick={() => setGameState('langPicker')} className="px-4 py-2 bg-rose-100 text-rose-700 rounded-xl text-sm font-bold hover:bg-rose-200 transition-colors">
-                  {i18n[settings.uiLang]?.label || 'Language'}
-                </button>
-              </div>
-
-              {/* 錯誤停留時間 */}
-              <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm">
-                <div className="flex justify-between items-center mb-3">
-                  <div><DT tKey="ed" spanClass="font-bold text-slate-700 leading-tight" />
-                    <DT tKey="edD" spanClass="text-xs text-slate-500 mt-1" /></div>
-                  <span className="text-xl font-bold text-rose-500">{settings.errorDisplayTime === 0 ? t('manual') : `${settings.errorDisplayTime}s`}</span>
-                </div>
-                <input type="range" min="0" max="10" step="1" value={settings.errorDisplayTime}
-                  onChange={e => setSettings({...settings, errorDisplayTime: parseInt(e.target.value)})}
-                  className="w-full accent-rose-500 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
-              </div>
-
-              {/* 語音人聲 */}
-              {availableVoices.length > 0 && (
-                <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm">
-                  <DT tKey="voice" spanClass="font-bold text-slate-700 mb-3 block" />
-                  <select value={settings.selectedVoiceURI || ''} onChange={e => setSettings({...settings, selectedVoiceURI: e.target.value})}
-                    className="w-full p-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-medium focus:outline-none focus:border-rose-400 appearance-none">
-                    <option value="">-- {t('defVoice')} --</option>
-                    {availableVoices.map((v, idx) => <option key={idx} value={v.voiceURI}>{v.name}</option>)}
-                  </select>
-                </div>
-              )}
-
-              {/* 發音模式 */}
-              <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm">
-                <DT tKey="am" spanClass="font-bold text-slate-700 mb-3 block" />
-                <div className="flex flex-col space-y-2">
-                  {[['auto','amA'],['manual','amM'],['repeat','amR']].map(([id, tk]) => (
-                    <div key={id} className="flex flex-col space-y-2">
-                      <label className={`flex items-center p-3 rounded-xl border-2 cursor-pointer transition-all ${settings.audioMode === id ? 'border-rose-400 bg-rose-50' : 'border-slate-100 hover:border-slate-200'}`}>
-                        <input type="radio" checked={settings.audioMode === id} onChange={() => setSettings({...settings, audioMode: id})} className="hidden" />
-                        <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${settings.audioMode === id ? 'border-rose-500' : 'border-slate-300'}`}>
-                          {settings.audioMode === id && <div className="w-2.5 h-2.5 bg-rose-500 rounded-full" />}
-                        </div>
-                        <DT tKey={tk} flexCol={false} spanClass={`font-medium text-sm ${settings.audioMode === id ? 'text-rose-700' : 'text-slate-600'}`} />
-                      </label>
-                      
-                      {id === 'repeat' && settings.audioMode === 'repeat' && (
-                        <div className="px-3 pb-3 animate-in slide-in-from-top-2 duration-200">
-                          <div className="flex justify-between items-center mb-2">
-                            <DT tKey="ai" spanClass="text-xs font-bold text-rose-600" />
-                            <span className="text-sm font-black text-rose-500">{settings.audioInterval}s</span>
-                          </div>
-                          <input type="range" min="1" max="5" step="1" value={settings.audioInterval}
-                            onChange={e => setSettings({...settings, audioInterval: parseInt(e.target.value)})}
-                            className="w-full accent-rose-500 h-1.5 bg-rose-100 rounded-lg appearance-none cursor-pointer" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 羅馬拼音 / 日文翻譯 切換 */}
-              {[['showRomaji','sr','srD'],['showJpSubtext','sj','sjD']].map(([field, tk, descTk]) => (
-                <div key={field} className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex items-center justify-between">
-                  <div><DT tKey={tk} spanClass="font-bold text-slate-700 leading-tight" /><DT tKey={descTk} spanClass="text-xs text-slate-500 mt-1" /></div>
-                  <button onClick={() => setSettings({...settings, [field]: !settings[field]})}
-                    className={`w-14 h-7 rounded-full relative transition-colors flex-shrink-0 ${settings[field] ? 'bg-green-500' : 'bg-slate-300'}`}>
-                    <div className={`w-5 h-5 bg-white rounded-full absolute top-[4px] transition-all ${settings[field] ? 'left-[32px]' : 'left-[4px]'}`} />
-                  </button>
-                </div>
-              ))}
-              {/* PWA 安裝按鈕 */}
-              {!isStandalone() && (
-                <div className="mt-8 pt-8 border-t border-slate-100">
-                  <div className="bg-rose-50 rounded-3xl p-6 border-2 border-rose-100">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-rose-500 text-white rounded-xl shadow-sm">
-                        <Download size={24} />
-                      </div>
-                      <div className="flex flex-col">
-                        <h3 className="font-bold text-slate-800 text-lg leading-tight"><DT tKey="pwaTitle" flexCol={false} /></h3>
-                        <p className="text-xs text-slate-500 mt-0.5"><DT tKey="pwaSub" flexCol={false} /></p>
-                      </div>
-                    </div>
-
-                    {deferredPrompt ? (
-                      <button onClick={handleInstallClick} className="w-full py-4 bg-rose-500 text-white font-bold rounded-2xl shadow-lg shadow-rose-200 active:scale-95 transition-all flex items-center justify-center gap-3">
-                        <Download size={20} />
-                        <DT tKey="pwaBtn" flexCol={false} />
-                      </button>
-                    ) : (
-                      <div className="bg-white/80 p-5 rounded-2xl border border-rose-100 shadow-sm">
-                        <div className="flex items-center gap-2 text-rose-500 font-bold text-sm mb-2">
-                          <Share size={18} />
-                          <DT tKey={isIos() ? 'pwaIos' : 'pwaTitle'} flexCol={false} />
-                        </div>
-                        <div className="text-sm text-slate-600 leading-relaxed font-medium bg-rose-50/50 p-3 rounded-xl">
-                          <DT tKey="pwaIosStep" flexCol={false} />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            <SettingsPanel
+              settings={settings}
+              setSettings={setSettings}
+              availableVoices={availableVoices}
+              t={t}
+              setGameState={setGameState}
+              isStandalone={isStandalone}
+              deferredPrompt={deferredPrompt}
+              handleInstallClick={handleInstallClick}
+              isIos={isIos}
+            />
           )}
 
         </div>

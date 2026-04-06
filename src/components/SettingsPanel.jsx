@@ -1,69 +1,132 @@
 import React from 'react';
+import { Globe, Download, Share } from 'lucide-react';
 import { DT } from './DT';
 import { i18n } from '../data/i18n';
 
-export const SettingsPanel = ({ settings, setSettings, availableVoices, t }) => {
+export const SettingsPanel = ({ 
+  settings, setSettings, availableVoices, t, 
+  setGameState, isStandalone, deferredPrompt, handleInstallClick, isIos 
+}) => {
   return (
-    <div className="flex flex-col flex-grow space-y-6">
-      <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex flex-col">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex flex-col mr-4">
-            <DT tKey="ed" settings={settings} spanClass="font-bold text-slate-700 leading-tight" jpClassName="mb-1" />
-            <div className="text-xs text-slate-500 mt-1">
-              <DT tKey="edD" settings={settings} spanClass="" jpClassName="mt-0.5" />
-            </div>
+    <div className="flex flex-col flex-grow space-y-5 pb-6">
+      {/* 語言選擇快捷 */}
+      <div className="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm flex items-center justify-between transition-all hover:border-rose-200">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-rose-50 rounded-xl text-rose-500">
+            <Globe size={20} />
           </div>
-          <div className="flex flex-col items-end">
-            <span className="text-xl font-bold text-rose-500 leading-tight">
-              {settings.errorDisplayTime === 0 ? t('manual') : `${settings.errorDisplayTime} s`}
-            </span>
-          </div>
+          <DT tKey="langBtn" settings={settings} spanClass="font-bold text-slate-700" flexCol={false} />
         </div>
-        <input
-          type="range" min="0" max="10" step="1"
-          value={settings.errorDisplayTime}
-          onChange={(e) => setSettings({ ...settings, errorDisplayTime: parseInt(e.target.value) })}
-          className="w-full accent-rose-500 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
-        />
+        <button onClick={() => setGameState('langPicker')} className="px-4 py-2 bg-rose-100 text-rose-700 rounded-xl text-sm font-bold hover:bg-rose-200 transition-colors">
+          {i18n[settings.uiLang]?.label || 'Language'}
+        </button>
       </div>
 
-      {availableVoices.length > 0 && (
-        <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex flex-col space-y-4">
-          <div className="flex flex-col">
-            <DT tKey="voice" settings={settings} spanClass="font-bold text-slate-700 leading-tight" jpClassName="mb-1" />
-            <div className="text-xs text-slate-500">
-              <DT tKey="voiceD" settings={settings} flexCol={false} jpClassName="block mt-0.5 opacity-70 text-[0.65rem]" />
-            </div>
+      {/* 錯誤停留時間 */}
+      <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm transition-all hover:border-rose-200">
+        <div className="flex justify-between items-center mb-3">
+          <div>
+            <DT tKey="ed" settings={settings} spanClass="font-bold text-slate-700 leading-tight" />
+            <DT tKey="edD" settings={settings} spanClass="text-xs text-slate-500 mt-1" />
           </div>
-          <select
-            value={settings.selectedVoiceURI || ''}
-            onChange={(e) => setSettings({ ...settings, selectedVoiceURI: e.target.value })}
-            className="w-full p-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-medium focus:outline-none focus:border-rose-400 appearance-none"
-          >
+          <span className="text-xl font-bold text-rose-500">{settings.errorDisplayTime === 0 ? t('manual') : `${settings.errorDisplayTime}s`}</span>
+        </div>
+        <input type="range" min="0" max="10" step="1" value={settings.errorDisplayTime}
+          onChange={e => setSettings({...settings, errorDisplayTime: parseInt(e.target.value)})}
+          className="w-full accent-rose-500 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+      </div>
+
+      {/* 語音人聲 */}
+      {availableVoices.length > 0 && (
+        <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm transition-all hover:border-rose-200">
+          <DT tKey="voice" settings={settings} spanClass="font-bold text-slate-700 mb-3 block" />
+          <select value={settings.selectedVoiceURI || ''} onChange={e => setSettings({...settings, selectedVoiceURI: e.target.value})}
+            className="w-full p-3 rounded-xl border-2 border-slate-200 bg-slate-50 text-slate-700 font-medium focus:outline-none focus:border-rose-400 appearance-none">
             <option value="">-- {t('defVoice')} --</option>
-            {availableVoices.map((voice, idx) => (
-              <option key={idx} value={voice.voiceURI}>{voice.name}</option>
-            ))}
+            {availableVoices.map((v, idx) => <option key={idx} value={v.voiceURI}>{v.name}</option>)}
           </select>
         </div>
       )}
 
-      <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex flex-col space-y-4">
-        <DT tKey="am" settings={settings} spanClass="font-bold text-slate-700 leading-tight" />
+      {/* 發音模式 */}
+      <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm transition-all hover:border-rose-200">
+        <DT tKey="am" settings={settings} spanClass="font-bold text-slate-700 mb-4 block" />
         <div className="flex flex-col space-y-2">
-          {['auto', 'manual', 'repeat'].map(m => (
-            <label key={m} className={`flex items-center p-3 rounded-xl border-2 cursor-pointer ${settings.audioMode === m ? 'border-rose-400 bg-rose-50' : 'border-slate-100'}`}>
-              <input type="radio" checked={settings.audioMode === m} onChange={() => setSettings({ ...settings, audioMode: m })} className="hidden" />
-              <DT tKey={m === 'auto' ? 'amA' : m === 'manual' ? 'amM' : 'amR'} settings={settings} spanClass="text-sm font-medium" />
-            </label>
+          {[['auto','amA'],['manual','amM'],['repeat','amR']].map(([id, tk]) => (
+            <div key={id} className="flex flex-col space-y-2">
+              <label className={`flex items-center p-3 rounded-xl border-2 cursor-pointer transition-all ${settings.audioMode === id ? 'border-rose-400 bg-rose-50' : 'border-slate-50 hover:border-slate-200'}`}>
+                <input type="radio" checked={settings.audioMode === id} onChange={() => setSettings({...settings, audioMode: id})} className="hidden" />
+                <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${settings.audioMode === id ? 'border-rose-500' : 'border-slate-300'}`}>
+                  {settings.audioMode === id && <div className="w-2.5 h-2.5 bg-rose-500 rounded-full" />}
+                </div>
+                <DT tKey={tk} settings={settings} flexCol={false} spanClass={`font-medium text-sm ${settings.audioMode === id ? 'text-rose-700' : 'text-slate-600'}`} />
+              </label>
+              
+              {id === 'repeat' && settings.audioMode === 'repeat' && (
+                <div className="px-3 pb-3 animate-in slide-in-from-top-2 duration-200">
+                  <div className="flex justify-between items-center mb-2">
+                    <DT tKey="ai" settings={settings} spanClass="text-xs font-bold text-rose-600" />
+                    <span className="text-sm font-black text-rose-500">{settings.audioInterval}s</span>
+                  </div>
+                  <input type="range" min="1" max="5" step="1" value={settings.audioInterval}
+                    onChange={e => setSettings({...settings, audioInterval: parseInt(e.target.value)})}
+                    className="w-full accent-rose-500 h-1.5 bg-rose-100 rounded-lg appearance-none cursor-pointer" />
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </div>
 
-      <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex items-center justify-between">
-        <DT tKey="sr" settings={settings} spanClass="font-bold text-slate-700" />
-        <button onClick={() => setSettings({ ...settings, showRomaji: !settings.showRomaji })} className={`w-12 h-6 rounded-full ${settings.showRomaji ? 'bg-green-500' : 'bg-slate-300'}`} />
+      {/* 羅馬拼音 / 日文翻譯 切換 */}
+      <div className="space-y-4">
+        {[['showRomaji','sr','srD'],['showJpSubtext','sj','sjD']].map(([field, tk, descTk]) => (
+          <div key={field} className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm flex items-center justify-between transition-all hover:border-rose-200">
+            <div className="flex-grow">
+              <DT tKey={tk} settings={settings} spanClass="font-bold text-slate-700 leading-tight" />
+              <DT tKey={descTk} settings={settings} spanClass="text-xs text-slate-500 mt-1" />
+            </div>
+            <button onClick={() => setSettings({...settings, [field]: !settings[field]})}
+              className={`w-14 h-7 rounded-full relative transition-colors flex-shrink-0 ${settings[field] ? 'bg-green-500' : 'bg-slate-300'}`}>
+              <div className={`w-5 h-5 bg-white rounded-full absolute top-[4px] transition-all ${settings[field] ? 'left-[32px]' : 'left-[4px]'}`} />
+            </button>
+          </div>
+        ))}
       </div>
+
+      {/* PWA 安裝按鈕 */}
+      {!isStandalone() && (
+        <div className="mt-4 pt-4 border-t border-slate-100">
+          <div className="bg-rose-50 rounded-3xl p-6 border-2 border-rose-100 transition-all hover:shadow-md">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-rose-500 text-white rounded-xl shadow-sm">
+                <Download size={24} />
+              </div>
+              <div className="flex flex-col">
+                <h3 className="font-bold text-slate-800 text-lg leading-tight"><DT tKey="pwaTitle" settings={settings} flexCol={false} /></h3>
+                <p className="text-xs text-slate-500 mt-0.5"><DT tKey="pwaSub" settings={settings} flexCol={false} /></p>
+              </div>
+            </div>
+
+            {deferredPrompt ? (
+              <button onClick={handleInstallClick} className="w-full py-4 bg-rose-500 text-white font-bold rounded-2xl shadow-lg shadow-rose-200 active:scale-95 transition-all flex items-center justify-center gap-3">
+                <Download size={20} />
+                <DT tKey="pwaBtn" settings={settings} flexCol={false} />
+              </button>
+            ) : (
+              <div className="bg-white/80 p-5 rounded-2xl border border-rose-100 shadow-sm">
+                <div className="flex items-center gap-2 text-rose-500 font-bold text-sm mb-2">
+                  <Share size={18} />
+                  <DT tKey={isIos() ? 'pwaIos' : 'pwaTitle'} settings={settings} flexCol={false} />
+                </div>
+                <div className="text-sm text-slate-600 leading-relaxed font-medium bg-rose-50/50 p-3 rounded-xl">
+                  <DT tKey="pwaIosStep" settings={settings} flexCol={false} />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
