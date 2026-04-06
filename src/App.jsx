@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Volume2, Play, CheckCircle2, XCircle, CalendarDays, ChevronLeft, ChevronRight, Zap, Globe, Eye, EyeOff, Edit2, KeyRound, Users } from 'lucide-react';
+import { Volume2, Play, CheckCircle2, XCircle, CalendarDays, ChevronLeft, ChevronRight, Zap, Globe, Eye, EyeOff, Edit2, KeyRound, Users, Settings2, X } from 'lucide-react';
 
 // 資料層
 import { kanaData, tableLayout, rowDefs, rowGroups, colDefs, colGroups, getTodayKey, shuffleArray } from './data/kanaData';
@@ -28,6 +27,7 @@ export default function App() {
   const [selectedCols, setSelectedCols] = useState([]);
   const [availableVoices, setAvailableVoices] = useState([]);
   const [tableDisplay, setTableDisplay] = useState({ hiragana: true, katakana: true, romaji: true, stats: false });
+  const [showQuickSettings, setShowQuickSettings] = useState(false);
   const [calMonth, setCalMonth] = useState(new Date());
   const [selDateStr, setSelDateStr] = useState(getTodayKey());
 
@@ -309,28 +309,67 @@ export default function App() {
 
           {/* 🟠 答題畫面（覆蓋所有 tab） */}
           {isPlaying && currentQuestion && (
-            <div className="flex flex-col h-full">
-              {/* 今日統計 */}
+            <div className="flex flex-col h-full relative">
+              {/* 今日統計 & 快速設定 */}
               <div className="flex justify-between items-center mb-4 flex-shrink-0 bg-white p-2.5 rounded-2xl shadow-sm border border-slate-100">
-                <span className="px-2 border-r-2 border-slate-100 pr-4">
-                  <DT tKey="mode" flexCol={false} spanClass="text-[0.65rem] text-slate-400 font-bold mb-0.5 block" />
-                  <span className="text-sm font-bold text-slate-700 leading-none">
-                    {mode === 'hira-to-kata' ? '平→片' : mode === 'kata-to-hira' ? '片→平' : mode === 'audio-to-kana' ? '聽音' : mode === 'romaji-to-kana' ? '羅→假片' : mode === 'kana-to-romaji' ? '假片→羅' : mode === 'typing' ? '拼寫' : mode}
+                <div className="flex items-center">
+                  <span className="px-2 border-r-2 border-slate-100 pr-4">
+                    <DT tKey="mode" flexCol={false} spanClass="text-[0.65rem] text-slate-400 font-bold mb-0.5 block" />
+                    <span className="text-sm font-bold text-slate-700 leading-none">
+                      {mode === 'hira-to-kata' ? '平→片' : mode === 'kata-to-hira' ? '片→平' : mode === 'audio-to-kana' ? '聽音' : mode === 'romaji-to-kana' ? '羅→假片' : mode === 'kana-to-romaji' ? '假片→羅' : mode === 'typing' ? '拼寫' : mode}
+                    </span>
                   </span>
-                </span>
-                <div className="flex gap-4 px-2">
-                  {['tot', 'corCount', 'wrgCount'].map((key, i) => {
-                    const val = dailyStats[getTodayKey()]?.[(i === 0 ? 'total' : i === 1 ? 'correct' : 'wrong')] || 0;
-                    const colors = ['text-slate-700', 'text-green-600', 'text-red-500'];
-                    return (
-                      <div key={key} className="flex flex-col items-center">
-                        <DT tKey={key} flexCol={false} spanClass={`text-[0.65rem] font-bold mb-0.5 ${i === 1 ? 'text-green-500/80' : i === 2 ? 'text-red-400' : 'text-slate-400'}`} />
-                        <span className={`text-sm font-bold leading-none ${colors[i]}`}>{val}</span>
-                      </div>
-                    );
-                  })}
+                  <div className="flex gap-4 px-4">
+                    {['tot', 'corCount', 'wrgCount'].map((key, i) => {
+                      const val = dailyStats[getTodayKey()]?.[(i === 0 ? 'total' : i === 1 ? 'correct' : 'wrong')] || 0;
+                      const colors = ['text-slate-700', 'text-green-600', 'text-red-500'];
+                      return (
+                        <div key={key} className="flex flex-col items-center">
+                          <DT tKey={key} flexCol={false} spanClass={`text-[0.65rem] font-bold mb-0.5 ${i === 1 ? 'text-green-500/80' : i === 2 ? 'text-red-400' : 'text-slate-400'}`} />
+                          <span className={`text-sm font-bold leading-none ${colors[i]}`}>{val}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
+                <button onClick={() => setShowQuickSettings(!showQuickSettings)} className={`p-2 rounded-xl transition-colors ${showQuickSettings ? 'bg-rose-100 text-rose-600' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
+                  <Settings2 size={20} />
+                </button>
               </div>
+
+              {/* 快速設定面板 (Overlay) */}
+              {showQuickSettings && (
+                <div className="absolute top-14 left-0 right-0 z-[60] bg-white border-2 border-rose-100 rounded-3xl shadow-2xl p-5 m-2 animate-in fade-in zoom-in duration-200">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-slate-700 flex items-center gap-2"><Settings2 size={16} /> <DT tKey="setTitle" flexCol={false} /></h3>
+                    <button onClick={() => setShowQuickSettings(false)} className="p-1 hover:bg-slate-100 rounded-full text-slate-400"><X size={20} /></button>
+                  </div>
+                  <div className="space-y-6">
+                    {/* 錯誤提示時間 */}
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <DT tKey="ed" spanClass="text-sm font-bold text-slate-600" />
+                        <span className="text-sm font-black text-rose-500">{settings.errorDisplayTime === 0 ? t('manual') : `${settings.errorDisplayTime}s`}</span>
+                      </div>
+                      <input type="range" min="0" max="10" step="1" value={settings.errorDisplayTime}
+                        onChange={e => setSettings({...settings, errorDisplayTime: parseInt(e.target.value)})}
+                        className="w-full accent-rose-500 h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer" />
+                    </div>
+                    {/* 重複間隔時間 (僅在重複發音模式下顯示) */}
+                    {settings.audioMode === 'repeat' && (
+                      <div className="pt-2 border-t border-slate-50">
+                        <div className="flex justify-between items-center mb-2">
+                          <DT tKey="ai" spanClass="text-sm font-bold text-indigo-600" />
+                          <span className="text-sm font-black text-indigo-500">{settings.audioInterval}s</span>
+                        </div>
+                        <input type="range" min="1" max="5" step="1" value={settings.audioInterval}
+                          onChange={e => setSettings({...settings, audioInterval: parseInt(e.target.value)})}
+                          className="w-full accent-indigo-500 h-2 bg-indigo-50 rounded-lg appearance-none cursor-pointer" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* 題目 */}
               <div className="flex flex-col items-center justify-center flex-grow mb-4 min-h-[140px] relative">
