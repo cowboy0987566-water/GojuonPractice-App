@@ -46,7 +46,7 @@ export const GojuonTable = ({ srsData, tableDisplay, setTableDisplay, playAudio,
             onClick={() => setTableDisplay(prev => ({...prev, [type]: !prev[type]}))}
             className={`px-3 py-2 rounded-xl text-sm font-bold transition-all ${tableDisplay[type] ? 'bg-rose-100 text-rose-700 shadow-inner' : 'text-slate-400 hover:bg-slate-100'}`}
           >
-            <DT tKey={`tb${type.charAt(0).toUpperCase() + type.slice(1)}`} settings={settings} flexCol={false} spanClass="leading-tight"/>
+            <DT tKey={{hiragana:'tbHira', katakana:'tbKata', romaji:'tbRoma', stats:'tbStats'}[type]} settings={settings} flexCol={false} spanClass="leading-tight"/>
           </button>
         ))}
       </div>
