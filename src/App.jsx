@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Volume2, Play, CheckCircle2, XCircle, CalendarDays, ChevronLeft, ChevronRight, Zap, Globe, Eye, EyeOff } from 'lucide-react';
+import { Volume2, Play, CheckCircle2, XCircle, CalendarDays, ChevronLeft, ChevronRight, Zap, Globe, Eye, EyeOff, Edit2, KeyRound } from 'lucide-react';
 
 // 資料層
 import { kanaData, tableLayout, rowDefs, rowGroups, colDefs, colGroups, getTodayKey, shuffleArray } from './data/kanaData';
@@ -22,6 +22,7 @@ export default function App() {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showCorrection, setShowCorrection] = useState(false);
+  const [typingInput, setTypingInput] = useState('');
 
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedCols, setSelectedCols] = useState([]);
@@ -138,20 +139,15 @@ export default function App() {
     setMode(selectedMode);
     setGameState('playing');
     setShowCorrection(false);
+    setTypingInput('');
     generateNextQuestion(selectedMode, srsData, settings);
   };
 
-  const handleAnswerClick = (option) => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setSelectedAnswer(option);
-    const isCorrect = option.romaji === currentQuestion.romaji;
-    if (!isCorrect) setShowCorrection(true);
-
+  const processAnswer = (isCorrect, currentSrsData) => {
     updateDailyStats(currentQuestion.romaji, isCorrect, getTodayKey());
 
     const key = currentQuestion.romaji;
-    const item = srsData[key] || { rep: 0, interval: 0, ease: 2.5, nextReview: 0, mistakes: 0, corrects: 0 };
+    const item = currentSrsData[key] || { rep: 0, interval: 0, ease: 2.5, nextReview: 0, mistakes: 0, corrects: 0 };
     let grade = isCorrect ? 4 : 0;
     let { rep, interval, ease, mistakes, corrects = 0 } = item;
     if (isCorrect) {
@@ -160,14 +156,34 @@ export default function App() {
     } else { rep = 0; interval = 1; mistakes += 1; }
     ease = Math.max(1.3, ease + 0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02));
     const nextReview = Date.now() + interval * 24 * 60 * 60 * 1000;
-    const updatedSrs = { ...srsData, [key]: { rep, interval, ease, nextReview, mistakes, corrects } };
+    const updatedSrs = { ...currentSrsData, [key]: { rep, interval, ease, nextReview, mistakes, corrects } };
     setSrsData(updatedSrs);
 
     if (isCorrect) {
-      setTimeout(() => { setShowCorrection(false); generateNextQuestion(mode, updatedSrs, settings); }, 1200);
+      setTimeout(() => { setShowCorrection(false); setTypingInput(''); generateNextQuestion(mode, updatedSrs, settings); }, 1200);
     } else if (settings.errorDisplayTime > 0) {
-      setTimeout(() => { setShowCorrection(false); generateNextQuestion(mode, updatedSrs, settings); }, settings.errorDisplayTime * 1000);
+      setTimeout(() => { setShowCorrection(false); setTypingInput(''); generateNextQuestion(mode, updatedSrs, settings); }, settings.errorDisplayTime * 1000);
     }
+  };
+
+  const handleAnswerClick = (option) => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setSelectedAnswer(option);
+    const isCorrect = option.romaji === currentQuestion.romaji;
+    if (!isCorrect) setShowCorrection(true);
+    processAnswer(isCorrect, srsData);
+  };
+
+  const handleTypingSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (isAnimating || !typingInput.trim()) return;
+    setIsAnimating(true);
+    const inputClean = typingInput.trim().toLowerCase();
+    const isCorrect = (inputClean === currentQuestion.romaji);
+    setSelectedAnswer({ romaji: inputClean });
+    if (!isCorrect) setShowCorrection(true);
+    processAnswer(isCorrect, srsData);
   };
 
   const getButtonStyle = (option) => {
@@ -298,7 +314,9 @@ export default function App() {
               <div className="flex justify-between items-center mb-4 flex-shrink-0 bg-white p-2.5 rounded-2xl shadow-sm border border-slate-100">
                 <span className="px-2 border-r-2 border-slate-100 pr-4">
                   <DT tKey="mode" flexCol={false} spanClass="text-[0.65rem] text-slate-400 font-bold mb-0.5 block" />
-                  <span className="text-sm font-bold text-slate-700 leading-none">{mode === 'hira-to-kata' ? '平→片' : '片→平'}</span>
+                  <span className="text-sm font-bold text-slate-700 leading-none">
+                    {mode === 'hira-to-kata' ? '平→片' : mode === 'kata-to-hira' ? '片→平' : mode === 'audio-to-kana' ? '聽音' : mode === 'romaji-to-kana' ? '羅→假片' : mode === 'kana-to-romaji' ? '假片→羅' : mode === 'typing' ? '拼寫' : mode}
+                  </span>
                 </span>
                 <div className="flex gap-4 px-2">
                   {['tot', 'corCount', 'wrgCount'].map((key, i) => {
@@ -324,41 +342,104 @@ export default function App() {
                     }
                   </div>
                 )}
-                <div className="text-[5.5rem] font-bold text-slate-800 leading-none mt-2 mb-2">
-                  {mode === 'hira-to-kata' ? currentQuestion.hiragana : currentQuestion.katakana}
-                </div>
-                {settings.showRomaji && <div className="text-xl font-bold text-slate-400 mb-2 uppercase tracking-widest">{currentQuestion.romaji}</div>}
-                <button onClick={() => playAudio(currentQuestion.katakana)} className="flex items-center gap-2 px-5 py-2 bg-indigo-50 text-indigo-600 rounded-full hover:bg-indigo-100 transition-colors active:scale-95 shadow-sm">
-                  <Volume2 size={18} />
-                  <DT tKey="pa" flexCol={false} spanClass="font-semibold text-sm" />
-                </button>
-                <button onClick={() => setSettings({ ...settings, showRomaji: !settings.showRomaji })} className="mt-2 flex items-center gap-2 px-4 py-1.5 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 transition-colors active:scale-95 text-[0.75rem] font-bold">
-                  {settings.showRomaji ? <EyeOff size={14} /> : <Eye size={14} />}
-                  <DT tKey="sr" flexCol={false} />
-                </button>
+                
+                {mode === 'audio-to-kana' && (
+                   <div onClick={() => playAudio(currentQuestion.katakana)} className="flex flex-col items-center justify-center bg-indigo-50 w-32 h-32 rounded-full border-4 border-indigo-100 shadow-inner mb-2 cursor-pointer active:scale-95 transition-transform hover:bg-indigo-100 mt-2">
+                      <Volume2 size={48} className="text-indigo-400" />
+                   </div>
+                )}
+
+                {mode !== 'audio-to-kana' && (
+                  <div className={`${mode === 'romaji-to-kana' ? 'text-[4.5rem] uppercase tracking-widest text-indigo-600' : 'text-[4.5rem] sm:text-[5rem] text-slate-800'} font-bold leading-none mt-4 mb-2`}>
+                    {mode === 'hira-to-kata' ? currentQuestion.hiragana :
+                     mode === 'kata-to-hira' ? currentQuestion.katakana :
+                     mode === 'romaji-to-kana' ? currentQuestion.romaji :
+                     `${currentQuestion.hiragana} / ${currentQuestion.katakana}`}
+                  </div>
+                )}
+
+                {settings.showRomaji && mode !== 'romaji-to-kana' && mode !== 'kana-to-romaji' && mode !== 'typing' && (
+                   <div className="text-xl font-bold text-slate-400 mb-2 uppercase tracking-widest">{currentQuestion.romaji}</div>
+                )}
+
+                {mode !== 'audio-to-kana' && (
+                  <button onClick={() => playAudio(currentQuestion.katakana)} className="flex items-center gap-2 px-5 py-2 bg-indigo-50 text-indigo-600 rounded-full hover:bg-indigo-100 transition-colors active:scale-95 shadow-sm">
+                    <Volume2 size={18} />
+                    <DT tKey="pa" flexCol={false} spanClass="font-semibold text-sm" />
+                  </button>
+                )}
+                
+                {(mode === 'audio-to-kana' || (settings.showRomaji === false && (mode === 'hira-to-kata' || mode === 'kata-to-hira'))) && (
+                   <button onClick={() => setSettings({ ...settings, showRomaji: !settings.showRomaji })} className="mt-2 flex items-center gap-2 px-4 py-1.5 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 transition-colors active:scale-95 text-[0.75rem] font-bold">
+                     {settings.showRomaji ? <EyeOff size={14} /> : <Eye size={14} />}
+                     <DT tKey="sr" flexCol={false} />
+                   </button>
+                )}
               </div>
 
               {/* 答錯提示 */}
               {showCorrection && (
-                <button onClick={() => { if (settings.errorDisplayTime === 0) { setShowCorrection(false); generateNextQuestion(mode, srsData, settings); } }}
+                <button onClick={() => { if (settings.errorDisplayTime === 0) { setShowCorrection(false); setTypingInput(''); generateNextQuestion(mode, srsData, settings); } }}
                   className={`w-full bg-red-50 border-2 border-red-400 rounded-2xl p-4 flex flex-col items-center mb-4 shadow-md flex-shrink-0 ${settings.errorDisplayTime === 0 ? 'cursor-pointer hover:bg-red-100' : 'cursor-default'}`}>
                   <div className="text-red-600 font-bold mb-1 flex items-center gap-1"><XCircle size={16} /> {t('ca')}</div>
-                  <div className="text-5xl font-black text-red-700">{mode === 'hira-to-kata' ? currentQuestion.katakana : currentQuestion.hiragana}</div>
-                  {settings.showRomaji && <div className="text-lg text-red-500/80 font-bold mt-1 uppercase tracking-widest">{currentQuestion.romaji}</div>}
+                  <div className="text-4xl font-black text-red-700">
+                     {mode === 'hira-to-kata' ? currentQuestion.katakana : 
+                      mode === 'kata-to-hira' ? currentQuestion.hiragana :
+                      mode === 'audio-to-kana' || mode === 'romaji-to-kana' ? `${currentQuestion.hiragana} / ${currentQuestion.katakana}` :
+                      currentQuestion.romaji
+                     }
+                  </div>
+                  {settings.showRomaji && mode !== 'kana-to-romaji' && mode !== 'typing' && (
+                     <div className="text-lg text-red-500/80 font-bold mt-1 uppercase tracking-widest">{currentQuestion.romaji}</div>
+                  )}
                 </button>
               )}
 
-              {/* 選項 */}
-              <div className="grid grid-cols-2 gap-4 mt-auto flex-shrink-0 relative">
-                {options.map((opt, idx) => (
-                  <button key={`${currentQuestion.romaji}-${opt.romaji}-${idx}`} onClick={() => handleAnswerClick(opt)} disabled={isAnimating}
-                    className={`text-4xl font-medium p-6 rounded-2xl transition-all duration-300 active:scale-95 flex items-center justify-center tracking-widest ${getButtonStyle(opt)}`}>
-                    {mode === 'hira-to-kata' ? opt.katakana : opt.hiragana}
-                  </button>
-                ))}
+              {/* 選項 / 輸入框 */}
+              <div className="mt-auto flex-shrink-0 relative">
+                
+                {mode === 'typing' ? (
+                  <form onSubmit={handleTypingSubmit} className="flex flex-col gap-3 pb-2 z-10 w-full relative">
+                    <input
+                      type="text"
+                      value={typingInput}
+                      onChange={(e) => setTypingInput(e.target.value)}
+                      disabled={isAnimating}
+                      autoFocus
+                      placeholder={t('typeHint') || 'Type romaji...'}
+                      autoCapitalize="none"
+                      autoComplete="off"
+                      autoCorrect="off"
+                      spellCheck="false"
+                      className="w-full text-center text-3xl font-black p-4 border-2 border-slate-200 rounded-2xl focus:border-rose-400 focus:outline-none focus:ring-4 focus:ring-rose-100 disabled:opacity-50 text-slate-700 bg-white shadow-sm"
+                    />
+                    <button type="submit" disabled={isAnimating || !typingInput.trim()}
+                      className="w-full bg-rose-500 text-white font-bold p-4 rounded-2xl disabled:bg-slate-300 disabled:cursor-not-allowed active:scale-95 transition-all text-lg shadow-sm">
+                      <DT tKey="submit" flexCol={false} />
+                    </button>
+                  </form>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    {options.map((opt, idx) => {
+                      let displayTxt = '';
+                      if (mode === 'kana-to-romaji') displayTxt = opt.romaji.toUpperCase();
+                      else if (mode === 'hira-to-kata') displayTxt = opt.katakana;
+                      else if (mode === 'kata-to-hira') displayTxt = opt.hiragana;
+                      else displayTxt = `${opt.hiragana} / ${opt.katakana}`;
+
+                      return (
+                        <button key={`${currentQuestion.romaji}-${opt.romaji}-${idx}`} onClick={() => handleAnswerClick(opt)} disabled={isAnimating}
+                          className={`text-3xl sm:text-4xl font-medium p-5 sm:p-6 rounded-2xl transition-all duration-300 active:scale-95 flex items-center justify-center tracking-widest ${getButtonStyle(opt)}`}>
+                          {mode === 'kana-to-romaji' ? <span className="font-bold text-xl sm:text-2xl tracking-widest">{displayTxt}</span> : displayTxt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                
                 {showCorrection && settings.errorDisplayTime === 0 && (
-                  <div onClick={() => { setShowCorrection(false); generateNextQuestion(mode, srsData, settings); }}
-                    className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer bg-white/30 backdrop-blur-[2px] rounded-2xl">
+                  <div onClick={() => { setShowCorrection(false); setTypingInput(''); generateNextQuestion(mode, srsData, settings); }}
+                    className="absolute inset-0 z-20 flex items-center justify-center cursor-pointer bg-white/40 backdrop-blur-[2px] rounded-2xl">
                     <div className="bg-rose-500 text-white px-5 py-3 rounded-full font-bold shadow-lg animate-bounce text-sm">{t('tapCont')}</div>
                   </div>
                 )}
@@ -439,14 +520,42 @@ export default function App() {
               <div className="mt-auto">
 
                 <div className="mb-3 text-sm font-bold text-slate-600"><DT tKey="s3" flexCol={false} spanClass="leading-tight" /></div>
-                <div className="space-y-3">
-                  {['hira-to-kata', 'kata-to-hira'].map(m => (
-                    <button key={m} onClick={() => startGame(m)} disabled={selectedRows.length === 0 && selectedCols.length === 0}
-                      className={`w-full flex items-center justify-between p-4 border-2 rounded-2xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-md'}`}>
-                      <DT tKey={m === 'hira-to-kata' ? 'mH2K' : 'mK2H'} className="items-start" spanClass="text-xl font-bold leading-tight" jpClassName="text-[0.7rem] text-slate-400 mt-1" />
-                      <Play className="text-slate-300 group-hover:text-rose-500" />
-                    </button>
-                  ))}
+                <div className="space-y-4">
+                  {/* Basic */}
+                  <div>
+                    <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest"><DT tKey="grpTestBasic" flexCol={false}/></div>
+                    <div className="grid grid-cols-1 gap-2">
+                      {[
+                        { id: 'hira-to-kata', tk: 'mH2K', icon: Play },
+                        { id: 'kata-to-hira', tk: 'mK2H', icon: Play },
+                        { id: 'audio-to-kana', tk: 'mAudio2Kana', icon: Volume2 }
+                      ].map(m => (
+                        <button key={m.id} onClick={() => startGame(m.id)} disabled={selectedRows.length === 0 && selectedCols.length === 0}
+                          className={`w-full flex items-center justify-between px-4 py-3 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm'}`}>
+                          <DT tKey={m.tk} className="items-start" spanClass="text-[0.95rem] font-bold leading-tight" jpClassName="text-[0.6rem] text-slate-400 mt-0.5" />
+                          <m.icon size={16} className="text-slate-300 group-hover:text-rose-500 flex-shrink-0 ml-2" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Advanced */}
+                  <div>
+                    <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest"><DT tKey="grpTestAdv" flexCol={false}/></div>
+                    <div className="grid grid-cols-1 gap-2">
+                       {[
+                        { id: 'romaji-to-kana', tk: 'mRomaji2Kana', icon: KeyRound },
+                        { id: 'kana-to-romaji', tk: 'mKana2Romaji', icon: KeyRound },
+                        { id: 'typing', tk: 'mTyping', icon: Edit2 } 
+                      ].map(m => (
+                        <button key={m.id} onClick={() => startGame(m.id)} disabled={selectedRows.length === 0 && selectedCols.length === 0}
+                          className={`w-full flex items-center justify-between px-4 py-3 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-sm'}`}>
+                          <DT tKey={m.tk} className="items-start" spanClass="text-[0.95rem] font-bold leading-tight" jpClassName="text-[0.6rem] text-slate-400 mt-0.5" />
+                          <m.icon size={16} className="text-slate-300 group-hover:text-indigo-500 flex-shrink-0 ml-2" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
