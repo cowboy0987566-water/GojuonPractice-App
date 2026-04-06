@@ -49,9 +49,18 @@ export default function App() {
   });
 
   const [isCustomOpen, setIsCustomOpen] = useState(settings.keepCustomOpen);
+  const [activePreset, setActivePreset] = useState(null);
 
-  const applyPreset = (preset) => {
-    switch (preset) {
+  // 監聽手動修改，若手動修改則取消預設選中狀態
+  useEffect(() => {
+    if (activePreset) {
+      // 這裡簡單處理：只要進入這裡就代表狀態變了，但為了避免 applyPreset 觸發造成的循環，我們只在非 applyPreset 期間重置
+    }
+  }, [selectedRows, selectedCols]);
+
+  const applyPreset = (presetId) => {
+    setActivePreset(presetId);
+    switch (presetId) {
       case 'basic':
         setSelectedRows(['a', 'ka', 'sa', 'ta', 'na', 'ha', 'ma', 'ya', 'ra', 'wa']);
         setSelectedCols(['col-a', 'col-i', 'col-u', 'col-e', 'col-o']);
@@ -529,18 +538,20 @@ export default function App() {
                     <DT tKey="presetTitle" flexCol={false} />
                  </div>
                  <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => applyPreset('basic')} className="py-3 bg-white border-2 border-slate-200 text-slate-800 font-bold rounded-xl active:scale-95 transition-all hover:border-rose-400 hover:text-rose-600 shadow-sm text-sm sm:text-base">
-                       <DT tKey="presetBasic" flexCol={false} />
-                    </button>
-                    <button onClick={() => applyPreset('dakuon')} className="py-3 bg-white border-2 border-slate-200 text-slate-800 font-bold rounded-xl active:scale-95 transition-all hover:border-rose-400 hover:text-rose-600 shadow-sm text-sm sm:text-base">
-                       <DT tKey="presetDaku" flexCol={false} />
-                    </button>
-                    <button onClick={() => applyPreset('yoon')} className="py-3 bg-white border-2 border-slate-200 text-slate-800 font-bold rounded-xl active:scale-95 transition-all hover:border-rose-400 hover:text-rose-600 shadow-sm text-sm sm:text-base">
-                       <DT tKey="presetYoon" flexCol={false} />
-                    </button>
-                    <button onClick={() => applyPreset('all')} className="py-3 bg-white border-2 border-slate-200 text-slate-800 font-bold rounded-xl active:scale-95 transition-all hover:border-rose-400 hover:text-rose-600 shadow-sm text-sm sm:text-base">
-                       <DT tKey="presetAll" flexCol={false} />
-                    </button>
+                    {[
+                      {id: 'basic', tk: 'presetBasic'},
+                      {id: 'dakuon', tk: 'presetDaku'},
+                      {id: 'yoon', tk: 'presetYoon'},
+                      {id: 'all', tk: 'presetAll'}
+                    ].map(p => (
+                      <button 
+                        key={p.id}
+                        onClick={() => applyPreset(p.id)} 
+                        className={`py-3 bg-white border-2 font-bold rounded-xl active:scale-95 transition-all shadow-sm text-sm sm:text-base ${activePreset === p.id ? 'border-rose-500 text-rose-600 ring-2 ring-rose-200' : 'border-slate-200 text-slate-800 hover:border-rose-400 hover:text-rose-600'}`}
+                      >
+                        <DT tKey={p.tk} flexCol={false} />
+                      </button>
+                    ))}
                  </div>
               </div>
 
@@ -574,7 +585,7 @@ export default function App() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {group.items.map(row => (
-                        <button key={row.id} onClick={() => setSelectedRows(p => p.includes(row.id) ? p.filter(id => id !== row.id) : [...p, row.id])}
+                        <button key={row.id} onClick={() => { setSelectedRows(p => p.includes(row.id) ? p.filter(id => id !== row.id) : [...p, row.id]); setActivePreset(null); }}
                           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedRows.includes(row.id) ? 'bg-rose-500 text-white' : 'bg-white border border-slate-200 text-slate-900 hover:border-rose-300'}`}>
                           <DT tKey={row.tKey} flexCol={false} />
                         </button>
@@ -601,7 +612,7 @@ export default function App() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                        {group.items.map(col => (
-                         <button key={col.id} onClick={() => setSelectedCols(p => p.includes(col.id) ? p.filter(id => id !== col.id) : [...p, col.id])}
+                         <button key={col.id} onClick={() => { setSelectedCols(p => p.includes(col.id) ? p.filter(id => id !== col.id) : [...p, col.id]); setActivePreset(null); }}
                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedCols.includes(col.id) ? 'bg-indigo-500 text-white' : 'bg-white border border-slate-200 text-slate-900 hover:border-indigo-300'}`}>
                            <DT tKey={col.tKey} flexCol={false} />
                          </button>
