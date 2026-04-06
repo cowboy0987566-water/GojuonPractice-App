@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, Download, Share } from 'lucide-react';
+import { Globe, Download, Share, RotateCcw } from 'lucide-react';
 import { DT } from './DT';
 import { i18n } from '../data/i18n';
 
@@ -7,6 +7,22 @@ export const SettingsPanel = ({
   settings, setSettings, availableVoices, t, 
   setGameState, isStandalone, deferredPrompt, handleInstallClick, isIos 
 }) => {
+  const clearCacheAndRestart = () => {
+    if (confirm('確定要清除快取並重新啟動嗎？這將重置所有暫存資源。')) {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (let registration of registrations) { registration.unregister(); }
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          for (let name of names) caches.delete(name);
+        });
+      }
+      window.location.reload(true);
+    }
+  };
+
   return (
     <div className="flex flex-col flex-grow space-y-5 pb-6">
       {/* 語言選擇快捷 */}
@@ -127,6 +143,21 @@ export const SettingsPanel = ({
           </div>
         </div>
       )}
+
+      {/* 緊急修復區塊 */}
+      <div className="mt-4 pt-4 border-t border-slate-100 mb-10">
+        <div className="bg-slate-100 rounded-3xl p-6 border-2 border-slate-200">
+          <div className="flex flex-col">
+            <h3 className="font-bold text-slate-700 text-sm leading-tight mb-1">
+              <DT tKey="clearCache" settings={settings} flexCol={false} />
+            </h3>
+            <button onClick={clearCacheAndRestart} className="w-full mt-3 py-3 bg-white border-2 border-slate-200 text-slate-500 font-bold rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-slate-50 hover:text-rose-500 hover:border-rose-200">
+              <RotateCcw size={16} />
+              <DT tKey="clearCacheBtn" settings={settings} flexCol={false} spanClass="text-xs" />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
