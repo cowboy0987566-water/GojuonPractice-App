@@ -570,7 +570,7 @@ export default function App() {
                       {group.items.map(row => (
                         <button key={row.id} onClick={() => setSelectedRows(p => p.includes(row.id) ? p.filter(id => id !== row.id) : [...p, row.id])}
                           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedRows.includes(row.id) ? 'bg-rose-500 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-rose-300'}`}>
-                          {row.label}
+                          <DT tKey={row.tKey} flexCol={false} />
                         </button>
                       ))}
                     </div>
@@ -597,7 +597,7 @@ export default function App() {
                        {group.items.map(col => (
                          <button key={col.id} onClick={() => setSelectedCols(p => p.includes(col.id) ? p.filter(id => id !== col.id) : [...p, col.id])}
                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedCols.includes(col.id) ? 'bg-indigo-500 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'}`}>
-                           {col.label}
+                           <DT tKey={col.tKey} flexCol={false} />
                          </button>
                        ))}
                     </div>
@@ -632,11 +632,10 @@ export default function App() {
                     <div className="grid grid-cols-1 gap-2">
                        <button onClick={() => startGame('recognition')} disabled={selectedRows.length === 0 && selectedCols.length === 0}
                          className={`w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm'}`}>
-                         <div className="flex flex-col items-start">
+                         <div className="flex flex-col items-start translate-y-[-1px]">
                             <span className="text-[1rem] font-bold text-slate-700 leading-tight">
-                               {settings.targetKana === 'hira' ? '平假名 → 片假名' : '片假名 → 平假名'}
+                               {t(settings.targetKana === 'hira' ? 'mH2K' : 'mK2H')}
                             </span>
-                            <span className="text-[0.6rem] text-slate-400 mt-1 font-bold tracking-wider">RECOGNITION</span>
                          </div>
                          <Play size={18} className="text-slate-300 group-hover:text-rose-500" />
                        </button>

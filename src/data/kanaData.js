@@ -56,19 +56,19 @@ export const tableLayout = {
 };
 
 export const rowDefs = [
-  { id: 'a', label: 'あ行', chars: ['a', 'i', 'u', 'e', 'o'] },
-  { id: 'ka', label: 'か行', chars: ['ka', 'ki', 'ku', 'ke', 'ko'] },
-  { id: 'sa', label: 'さ行', chars: ['sa', 'shi', 'su', 'se', 'so'] },
-  { id: 'ta', label: 'た行', chars: ['ta', 'chi', 'tsu', 'te', 'to'] },
-  { id: 'na', label: 'な行', chars: ['na', 'ni', 'nu', 'ne', 'no'] },
-  { id: 'ha', label: 'は行', chars: ['ha', 'hi', 'fu', 'he', 'ho'] },
-  { id: 'ma', label: 'ま行', chars: ['ma', 'mi', 'mu', 'me', 'mo'] },
-  { id: 'ya', label: 'や行', chars: ['ya', 'yu', 'yo'] },
-  { id: 'ra', label: 'ら行', chars: ['ra', 'ri', 'ru', 're', 'ro'] },
-  { id: 'wa', label: 'わ・ん', chars: ['wa', 'wo', 'n'] },
-  { id: 'dakuon', label: '濁音 (全部)', chars: ['ga','gi','gu','ge','go','za','ji','zu','ze','zo','da','dji','dzu','de','do','ba','bi','bu','be','bo'] },
-  { id: 'handakuon', label: '半濁音 (全部)', chars: ['pa','pi','pu','pe','po'] },
-  { id: 'yoon', label: '拗音 (全部)', chars: ['kya','kyu','kyo','sha','shu','sho','cha','chu','cho','nya','nyu','nyo','hya','hyu','hyo','mya','myu','myo','rya','ryu','ryo','gya','gyu','gyo','ja','ju','jo','bya','byu','byo','pya','pyu','pyo'] }
+  { id: 'a', tKey: 'rowA', label: 'あ行', chars: ['a', 'i', 'u', 'e', 'o'] },
+  { id: 'ka', tKey: 'rowKa', label: 'か行', chars: ['ka', 'ki', 'ku', 'ke', 'ko'] },
+  { id: 'sa', tKey: 'rowSa', label: 'さ行', chars: ['sa', 'shi', 'su', 'se', 'so'] },
+  { id: 'ta', tKey: 'rowTa', label: 'た行', chars: ['ta', 'chi', 'tsu', 'te', 'to'] },
+  { id: 'na', tKey: 'rowNa', label: 'な行', chars: ['na', 'ni', 'nu', 'ne', 'no'] },
+  { id: 'ha', tKey: 'rowHa', label: 'は行', chars: ['ha', 'hi', 'fu', 'he', 'ho'] },
+  { id: 'ma', tKey: 'rowMa', label: 'ま行', chars: ['ma', 'mi', 'mu', 'me', 'mo'] },
+  { id: 'ya', tKey: 'rowYa', label: 'や行', chars: ['ya', 'yu', 'yo'] },
+  { id: 'ra', tKey: 'rowRa', label: 'ら行', chars: ['ra', 'ri', 'ru', 're', 'ro'] },
+  { id: 'wa', tKey: 'rowWa', label: 'わ・ん', chars: ['wa', 'wo', 'n'] },
+  { id: 'dakuon', tKey: 'rowDakuon', label: '濁音 (全部)', chars: ['ga','gi','gu','ge','go','za','ji','zu','ze','zo','da','dji','dzu','de','do','ba','bi','bu','be','bo'] },
+  { id: 'handakuon', tKey: 'rowHandakuon', label: '半濁音 (全部)', chars: ['pa','pi','pu','pe','po'] },
+  { id: 'yoon', tKey: 'rowYoon', label: '拗音 (全部)', chars: ['kya','kyu','kyo','sha','shu','sho','cha','chu','cho','nya','nyu','nyo','hya','hyu','hyo','mya','myu','myo','rya','ryu','ryo','gya','gyu','gyo','ja','ju','jo','bya','byu','byo','pya','pyu','pyo'] }
 ];
 
 export const rowGroups = [
@@ -77,15 +77,15 @@ export const rowGroups = [
 ];
 
 export const colDefs = [
-  { id: 'col-a', label: 'あ段', chars: ['a','ka','sa','ta','na','ha','ma','ya','ra','wa','ga','za','da','ba','pa'] },
-  { id: 'col-i', label: 'い段', chars: ['i','ki','shi','chi','ni','hi','mi','ri','gi','ji','dji','bi','pi'] },
-  { id: 'col-u', label: 'う段', chars: ['u','ku','su','tsu','nu','fu','mu','yu','ru','gu','zu','dzu','bu','pu'] },
-  { id: 'col-e', label: 'え段', chars: ['e','ke','se','te','ne','he','me','re','ge','ze','de','be','pe'] },
-  { id: 'col-o', label: 'お段', chars: ['o','ko','so','to','no','ho','mo','yo','ro','wo','go','zo','do','bo','po'] },
-  { id: 'col-ya', label: 'ゃ段(拗)', chars: ['kya','sha','cha','nya','hya','mya','rya','gya','ja','bya','pya'] },
-  { id: 'col-yu', label: 'ゅ段(拗)', chars: ['kyu','shu','chu','nyu','hyu','myu','ryu','gyu','ju','byu','pyu'] },
-  { id: 'col-yo', label: 'ょ段(拗)', chars: ['kyo','sho','cho','nyo','hyo','myo','ryo','gyo','jo','byo','pyo'] },
-  { id: 'col-n', label: '撥音(ん)', chars: ['n'] }
+  { id: 'col-a', tKey: 'colA', label: 'あ段', chars: ['a','ka','sa','ta','na','ha','ma','ya','ra','wa','ga','za','da','ba','pa'] },
+  { id: 'col-i', tKey: 'colI', label: 'い段', chars: ['i','ki','shi','chi','ni','hi','mi','ri','gi','ji','dji','bi','pi'] },
+  { id: 'col-u', tKey: 'colU', label: 'う段', chars: ['u','ku','su','tsu','nu','fu','mu','yu','ru','gu','zu','dzu','bu','pu'] },
+  { id: 'col-e', tKey: 'colE', label: 'え段', chars: ['e','ke','se','te','ne','he','me','re','ge','ze','de','be','pe'] },
+  { id: 'col-o', tKey: 'colO', label: 'お段', chars: ['o','ko','so','to','no','ho','mo','yo','ro','wo','go','zo','do','bo','po'] },
+  { id: 'col-ya', tKey: 'colYa', label: 'ゃ段(拗)', chars: ['kya','sha','cha','nya','hya','mya','rya','gya','ja','bya','pya'] },
+  { id: 'col-yu', tKey: 'colYu', label: 'ゅ段(拗)', chars: ['kyu','shu','chu','nyu','hyu','myu','ryu','gyu','ju','byu','pyu'] },
+  { id: 'col-yo', tKey: 'colYo', label: 'ょ段(拗)', chars: ['kyo','sho','cho','nyo','hyo','myo','ryo','gyo','jo','byo','pyo'] },
+  { id: 'col-n', tKey: 'colN', label: '撥音(ん)', chars: ['n'] }
 ];
 
 export const colGroups = [
