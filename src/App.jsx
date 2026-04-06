@@ -432,13 +432,11 @@ export default function App() {
                   )}
                 </div>
                 
-                {(mode === 'audio-to-kana' || (settings.showRomaji === false && (mode === 'hira-to-kata' || mode === 'kata-to-hira'))) && (
-                   <button onClick={() => setSettings({ ...settings, showRomaji: !settings.showRomaji })} 
-                     className={`mt-4 flex items-center gap-2 px-4 py-2 rounded-full transition-all active:scale-95 text-[0.8rem] font-bold shadow-sm ${settings.showRomaji ? 'bg-rose-100 text-rose-600 border border-rose-200' : 'bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200'}`}>
-                     {settings.showRomaji ? <EyeOff size={14} /> : <Eye size={14} />}
-                     <DT tKey="sr" flexCol={false} />
-                   </button>
-                )}
+                <button onClick={() => setSettings({ ...settings, showRomaji: !settings.showRomaji })} 
+                  className={`mt-4 flex items-center gap-2 px-4 py-2 rounded-full transition-all active:scale-95 text-[0.8rem] font-bold shadow-sm ${settings.showRomaji ? 'bg-rose-100 text-rose-600 border border-rose-200' : 'bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200'}`}>
+                  {settings.showRomaji ? <EyeOff size={14} /> : <Eye size={14} />}
+                  <DT tKey="sr" flexCol={false} />
+                </button>
               </div>
 
               {/* 答錯提示 */}
