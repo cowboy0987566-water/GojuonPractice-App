@@ -595,13 +595,27 @@ export default function App() {
                 <DT tKey="am" spanClass="font-bold text-slate-700 mb-3 block" />
                 <div className="flex flex-col space-y-2">
                   {[['auto','amA'],['manual','amM'],['repeat','amR']].map(([id, tk]) => (
-                    <label key={id} className={`flex items-center p-3 rounded-xl border-2 cursor-pointer ${settings.audioMode === id ? 'border-rose-400 bg-rose-50' : 'border-slate-100'}`}>
-                      <input type="radio" checked={settings.audioMode === id} onChange={() => setSettings({...settings, audioMode: id})} className="hidden" />
-                      <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${settings.audioMode === id ? 'border-rose-500' : 'border-slate-300'}`}>
-                        {settings.audioMode === id && <div className="w-2.5 h-2.5 bg-rose-500 rounded-full" />}
-                      </div>
-                      <DT tKey={tk} flexCol={false} spanClass={`font-medium text-sm ${settings.audioMode === id ? 'text-rose-700' : 'text-slate-600'}`} />
-                    </label>
+                    <div key={id} className="flex flex-col space-y-2">
+                      <label className={`flex items-center p-3 rounded-xl border-2 cursor-pointer transition-all ${settings.audioMode === id ? 'border-rose-400 bg-rose-50' : 'border-slate-100 hover:border-slate-200'}`}>
+                        <input type="radio" checked={settings.audioMode === id} onChange={() => setSettings({...settings, audioMode: id})} className="hidden" />
+                        <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${settings.audioMode === id ? 'border-rose-500' : 'border-slate-300'}`}>
+                          {settings.audioMode === id && <div className="w-2.5 h-2.5 bg-rose-500 rounded-full" />}
+                        </div>
+                        <DT tKey={tk} flexCol={false} spanClass={`font-medium text-sm ${settings.audioMode === id ? 'text-rose-700' : 'text-slate-600'}`} />
+                      </label>
+                      
+                      {id === 'repeat' && settings.audioMode === 'repeat' && (
+                        <div className="px-3 pb-3 animate-in slide-in-from-top-2 duration-200">
+                          <div className="flex justify-between items-center mb-2">
+                            <DT tKey="ai" spanClass="text-xs font-bold text-rose-600" />
+                            <span className="text-sm font-black text-rose-500">{settings.audioInterval}s</span>
+                          </div>
+                          <input type="range" min="1" max="5" step="1" value={settings.audioInterval}
+                            onChange={e => setSettings({...settings, audioInterval: parseInt(e.target.value)})}
+                            className="w-full accent-rose-500 h-1.5 bg-rose-100 rounded-lg appearance-none cursor-pointer" />
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
