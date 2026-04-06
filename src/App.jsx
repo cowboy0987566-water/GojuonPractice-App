@@ -10,6 +10,10 @@ import { useSRS, useDailyStats } from './hooks/useSRS';
 
 // 元件層
 import { BottomNav } from './components/BottomNav';
+import { DT } from './components/DT';
+import { GojuonTable } from './components/GojuonTable';
+import { StatsView } from './components/StatsView';
+import { LearningCalendar } from './components/LearningCalendar';
 
 export default function App() {
   // ─── 狀態管理 ───
