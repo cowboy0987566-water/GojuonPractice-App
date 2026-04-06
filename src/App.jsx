@@ -39,8 +39,8 @@ export default function App() {
     try {
       const saved = localStorage.getItem('gojuon_settings_v1');
       const parsed = saved ? JSON.parse(saved) : {};
-      return { showRomaji: false, errorDisplayTime: 3, audioMode: 'auto', audioInterval: 3, uiLang: 'zh-TW', showJpSubtext: false, selectedVoiceURI: '', ...parsed };
-    } catch { return { showRomaji: false, errorDisplayTime: 3, audioMode: 'auto', audioInterval: 3, uiLang: 'zh-TW', showJpSubtext: false, selectedVoiceURI: '' }; }
+      return { showRomaji: false, errorDisplayTime: 3, audioMode: 'auto', audioInterval: 3, uiLang: 'zh-TW', showJpSubtext: false, selectedVoiceURI: '', targetKana: 'hira', ...parsed };
+    } catch { return { showRomaji: false, errorDisplayTime: 3, audioMode: 'auto', audioInterval: 3, uiLang: 'zh-TW', showJpSubtext: false, selectedVoiceURI: '', targetKana: 'hira' }; }
   });
 
   useEffect(() => { localStorage.setItem('gojuon_settings_v1', JSON.stringify(settings)); }, [settings]);
@@ -317,7 +317,8 @@ export default function App() {
                   <span className="px-2 border-r-2 border-slate-100 pr-4">
                     <DT tKey="mode" flexCol={false} spanClass="text-[0.65rem] text-slate-400 font-bold mb-0.5 block" />
                     <span className="text-sm font-bold text-slate-700 leading-none">
-                      {mode === 'hira-to-kata' ? '平→片' : mode === 'kata-to-hira' ? '片→平' : mode === 'audio-to-kana' ? '聽音' : mode === 'romaji-to-kana' ? '羅→假片' : mode === 'kana-to-romaji' ? '假片→羅' : mode === 'typing' ? '拼寫' : mode}
+                      {mode === 'recognition' ? (settings.targetKana === 'hira' ? '平→片' : '片→平') : 
+                       mode === 'audio-to-kana' ? '聽音' : mode === 'romaji-to-kana' ? '羅→假片' : mode === 'kana-to-romaji' ? '假片→羅' : mode === 'typing' ? '拼寫' : mode}
                     </span>
                   </span>
                   <div className="flex gap-4 px-4">
@@ -368,6 +369,18 @@ export default function App() {
                           className="w-full accent-indigo-500 h-2 bg-indigo-50 rounded-lg appearance-none cursor-pointer" />
                       </div>
                     )}
+                    {/* 測驗目標切換 (快速設定中) */}
+                    <div className="pt-2 border-t border-slate-50">
+                        <div className="text-sm font-bold text-slate-600 mb-2"><DT tKey="tgtTitle" flexCol={false} /></div>
+                        <div className="flex bg-slate-100 p-1 rounded-xl">
+                          {['hira', 'kata'].map(t => (
+                            <button key={t} onClick={() => setSettings({ ...settings, targetKana: t })}
+                              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${settings.targetKana === t ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+                              <DT tKey={t === 'hira' ? 'tgtHira' : 'tgtKata'} flexCol={false} />
+                            </button>
+                          ))}
+                        </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -444,9 +457,8 @@ export default function App() {
                   className={`w-full bg-red-50 border-2 border-red-400 rounded-2xl p-4 flex flex-col items-center mb-4 shadow-md flex-shrink-0 ${settings.errorDisplayTime === 0 ? 'cursor-pointer hover:bg-red-100' : 'cursor-default'}`}>
                   <div className="text-red-600 font-bold mb-1 flex items-center gap-1"><XCircle size={16} /> {t('ca')}</div>
                   <div className="text-4xl font-black text-red-700">
-                     {mode === 'hira-to-kata' ? currentQuestion.katakana : 
-                      mode === 'kata-to-hira' ? currentQuestion.hiragana :
-                      mode === 'audio-to-kana' || mode === 'romaji-to-kana' ? `${currentQuestion.hiragana} / ${currentQuestion.katakana}` :
+                     {mode === 'recognition' ? (settings.targetKana === 'hira' ? currentQuestion.katakana : currentQuestion.hiragana) : 
+                      mode === 'audio-to-kana' || mode === 'romaji-to-kana' ? (settings.targetKana === 'hira' ? currentQuestion.hiragana : currentQuestion.katakana) :
                       currentQuestion.romaji
                      }
                   </div>
@@ -484,9 +496,8 @@ export default function App() {
                     {options.map((opt, idx) => {
                       let displayTxt = '';
                       if (mode === 'kana-to-romaji') displayTxt = opt.romaji.toUpperCase();
-                      else if (mode === 'hira-to-kata') displayTxt = opt.katakana;
-                      else if (mode === 'kata-to-hira') displayTxt = opt.hiragana;
-                      else displayTxt = `${opt.hiragana} / ${opt.katakana}`;
+                      else if (mode === 'recognition') displayTxt = settings.targetKana === 'hira' ? opt.katakana : opt.hiragana;
+                      else displayTxt = settings.targetKana === 'hira' ? opt.hiragana : opt.katakana;
 
                       return (
                         <button key={`${currentQuestion.romaji}-${opt.romaji}-${idx}`} onClick={() => handleAnswerClick(opt)} disabled={isAnimating}
@@ -523,6 +534,23 @@ export default function App() {
           {/* ─── Tab: 首頁（選擇練習範圍） ─── */}
           {!isPlaying && !isLangPicker && activeTab === 'menu' && (
             <div className="flex flex-col flex-grow">
+              {/* 🎯 測驗目標切換 (全域方案B) */}
+              <div className="mb-6">
+                 <div className="mb-2 text-sm font-bold text-slate-700 flex items-center justify-between">
+                    <DT tKey="tgtTitle" flexCol={false} />
+                    <span className="text-xs text-rose-500 font-bold bg-rose-50 px-2 py-0.5 rounded-full">{settings.targetKana === 'hira' ? 'あかさたな...' : 'アカサタナ...'}</span>
+                 </div>
+                 <div className="flex bg-slate-200/50 p-1 rounded-2xl backdrop-blur-sm border border-slate-100">
+                    {['hira', 'kata'].map(t => (
+                      <button key={t} onClick={() => setSettings({ ...settings, targetKana: t })}
+                        className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${settings.targetKana === t ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                        {t === 'hira' ? <Zap size={14} className={settings.targetKana === t ? 'text-rose-500' : 'text-slate-300'} /> : <Zap size={14} className={settings.targetKana === t ? 'text-rose-500' : 'text-slate-300'} />}
+                        <DT tKey={t === 'hira' ? 'tgtHira' : 'tgtKata'} flexCol={false} />
+                      </button>
+                    ))}
+                 </div>
+              </div>
+
               {/* 行選擇 */}
               <div className="mb-5">
                 <div className="flex justify-between items-center mb-3">
@@ -562,41 +590,61 @@ export default function App() {
                 {colGroups.map((group, gIdx) => (
                   <div key={gIdx} className="mb-3">
                     <div className="flex items-center gap-1.5 mb-2">
-                      <div className={`w-1 h-3.5 rounded-full ${gIdx === 0 ? 'bg-indigo-400' : 'bg-amber-400'}`} />
-                      <DT tKey={group.tKey} flexCol={false} spanClass="text-xs font-bold text-slate-500" />
+                       <div className={`w-1 h-3.5 rounded-full ${gIdx === 0 ? 'bg-indigo-400' : 'bg-amber-400'}`} />
+                       <DT tKey={group.tKey} flexCol={false} spanClass="text-xs font-bold text-slate-500" />
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {group.items.map(col => (
-                        <button key={col.id} onClick={() => setSelectedCols(p => p.includes(col.id) ? p.filter(id => id !== col.id) : [...p, col.id])}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedCols.includes(col.id) ? 'bg-indigo-500 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'}`}>
-                          {col.label}
-                        </button>
-                      ))}
+                       {group.items.map(col => (
+                         <button key={col.id} onClick={() => setSelectedCols(p => p.includes(col.id) ? p.filter(id => id !== col.id) : [...p, col.id])}
+                           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedCols.includes(col.id) ? 'bg-indigo-500 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'}`}>
+                           {col.label}
+                         </button>
+                       ))}
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* 提示 + 開始按鈕 */}
-              <div className="mt-auto">
+              {/* 🎯 練習目標切換 (方案B) */}
+              <div className="mb-6 pt-4 border-t border-slate-200">
+                 <div className="mb-2 text-sm font-bold text-slate-700 flex items-center justify-between">
+                    <DT tKey="tgtTitle" flexCol={false} />
+                    <span className="text-xs text-rose-500 font-bold bg-rose-50 px-2 py-0.5 rounded-full">{settings.targetKana === 'hira' ? 'あかさたな...' : 'アカサタナ...'}</span>
+                 </div>
+                 <div className="flex bg-slate-200/50 p-1 rounded-2xl border border-slate-100">
+                    {['hira', 'kata'].map(t => (
+                      <button key={t} onClick={() => setSettings({ ...settings, targetKana: t })}
+                        className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${settings.targetKana === t ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                        <Zap size={14} className={settings.targetKana === t ? 'text-rose-500' : 'text-slate-300'} />
+                        <DT tKey={t === 'hira' ? 'tgtHira' : 'tgtKata'} flexCol={false} />
+                      </button>
+                    ))}
+                 </div>
+              </div>
 
+              {/* 🚀 開始按鈕 */}
+              <div className="mt-auto">
                 <div className="mb-3 text-sm font-bold text-slate-600"><DT tKey="s3" flexCol={false} spanClass="leading-tight" /></div>
                 <div className="space-y-4">
                   {/* Basic */}
                   <div>
                     <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest"><DT tKey="grpTestBasic" flexCol={false}/></div>
                     <div className="grid grid-cols-1 gap-2">
-                      {[
-                        { id: 'hira-to-kata', tk: 'mH2K', icon: Play },
-                        { id: 'kata-to-hira', tk: 'mK2H', icon: Play },
-                        { id: 'audio-to-kana', tk: 'mAudio2Kana', icon: Volume2 }
-                      ].map(m => (
-                        <button key={m.id} onClick={() => startGame(m.id)} disabled={selectedRows.length === 0 && selectedCols.length === 0}
-                          className={`w-full flex items-center justify-between px-4 py-3 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm'}`}>
-                          <DT tKey={m.tk} className="items-start" spanClass="text-[0.95rem] font-bold leading-tight" jpClassName="text-[0.6rem] text-slate-400 mt-0.5" />
-                          <m.icon size={16} className="text-slate-300 group-hover:text-rose-500 flex-shrink-0 ml-2" />
-                        </button>
-                      ))}
+                       <button onClick={() => startGame('recognition')} disabled={selectedRows.length === 0 && selectedCols.length === 0}
+                         className={`w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm'}`}>
+                         <div className="flex flex-col items-start">
+                            <span className="text-[1rem] font-bold text-slate-700 leading-tight">
+                               {settings.targetKana === 'hira' ? '平假名 → 片假名' : '片假名 → 平假名'}
+                            </span>
+                            <span className="text-[0.6rem] text-slate-400 mt-1 font-bold tracking-wider">RECOGNITION</span>
+                         </div>
+                         <Play size={18} className="text-slate-300 group-hover:text-rose-500" />
+                       </button>
+                       <button onClick={() => startGame('audio-to-kana')} disabled={selectedRows.length === 0 && selectedCols.length === 0}
+                         className={`w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm'}`}>
+                         <DT tKey="mAudio2Kana" className="items-start" spanClass="text-[1rem] font-bold text-slate-700 leading-tight" jpClassName="text-[0.6rem] text-slate-400 mt-0.5" />
+                         <Volume2 size={18} className="text-slate-300 group-hover:text-rose-500" />
+                       </button>
                     </div>
                   </div>
                   
@@ -610,9 +658,9 @@ export default function App() {
                         { id: 'typing', tk: 'mTyping', icon: Edit2 } 
                       ].map(m => (
                         <button key={m.id} onClick={() => startGame(m.id)} disabled={selectedRows.length === 0 && selectedCols.length === 0}
-                          className={`w-full flex items-center justify-between px-4 py-3 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-sm'}`}>
-                          <DT tKey={m.tk} className="items-start" spanClass="text-[0.95rem] font-bold leading-tight" jpClassName="text-[0.6rem] text-slate-400 mt-0.5" />
-                          <m.icon size={16} className="text-slate-300 group-hover:text-indigo-500 flex-shrink-0 ml-2" />
+                          className={`w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-sm'}`}>
+                          <DT tKey={m.tk} className="items-start" spanClass="text-[1rem] font-bold text-slate-700 leading-tight" jpClassName="text-[0.6rem] text-slate-400 mt-0.5" />
+                          <m.icon size={18} className="text-slate-300 group-hover:text-indigo-500" />
                         </button>
                       ))}
                     </div>
