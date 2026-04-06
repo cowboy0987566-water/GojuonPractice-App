@@ -59,14 +59,14 @@ export const GojuonTable = ({ srsData, tableDisplay, setTableDisplay, playAudio,
       </div>
 
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3 pl-1"><div className="h-4 w-1 bg-indigo-400 rounded-full"></div><DT tKey="grpDaku" settings={settings} spanClass="font-bold text-slate-700" flexCol={false} /></div>
+        <div className="flex items-center gap-2 mb-3 pl-1"><div className="h-4 w-1 bg-indigo-400 rounded-full"></div><DT tKey="rowDakuon" settings={settings} spanClass="font-bold text-slate-700" flexCol={false} /></div>
         <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
           {tableLayout.dakuon.map((row) => row.map((col, idx) => <KanaCell key={idx} romajiKey={col} srsData={srsData} tableDisplay={tableDisplay} playAudio={playAudio} />))}
         </div>
       </div>
 
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3 pl-1"><div className="h-4 w-1 bg-amber-400 rounded-full"></div><DT tKey="grpYoon" settings={settings} spanClass="font-bold text-slate-700" flexCol={false} /></div>
+        <div className="flex items-center gap-2 mb-3 pl-1"><div className="h-4 w-1 bg-amber-400 rounded-full"></div><DT tKey="rowYoon" settings={settings} spanClass="font-bold text-slate-700" flexCol={false} /></div>
         <div className="grid grid-cols-3 gap-1.5 sm:gap-2 max-w-[80%]">
           {tableLayout.yoon.map((row) => row.map((col, idx) => <KanaCell key={idx} romajiKey={col} srsData={srsData} tableDisplay={tableDisplay} playAudio={playAudio} />))}
         </div>
