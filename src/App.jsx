@@ -495,22 +495,6 @@ export default function App() {
           {/* ─── Tab: 首頁（選擇練習範圍） ─── */}
           {!isPlaying && !isLangPicker && activeTab === 'menu' && (
             <div className="flex flex-col flex-grow">
-              {/* 🎯 測驗目標切換 (全域方案B) */}
-              <div className="mb-6">
-                 <div className="mb-2 text-sm font-bold text-slate-700 flex items-center justify-between">
-                    <DT tKey="tgtTitle" flexCol={false} />
-                    <span className="text-xs text-rose-500 font-bold bg-rose-50 px-2 py-0.5 rounded-full">{settings.targetKana === 'hira' ? 'あかさたな...' : 'アカサタナ...'}</span>
-                 </div>
-                 <div className="flex bg-slate-200/50 p-1 rounded-2xl backdrop-blur-sm border border-slate-100">
-                    {['hira', 'kata'].map(t => (
-                      <button key={t} onClick={() => setSettings({ ...settings, targetKana: t })}
-                        className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${settings.targetKana === t ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-                        {t === 'hira' ? <Zap size={14} className={settings.targetKana === t ? 'text-rose-500' : 'text-slate-300'} /> : <Zap size={14} className={settings.targetKana === t ? 'text-rose-500' : 'text-slate-300'} />}
-                        <DT tKey={t === 'hira' ? 'tgtHira' : 'tgtKata'} flexCol={false} />
-                      </button>
-                    ))}
-                 </div>
-              </div>
 
               {/* 行選擇 */}
               <div className="mb-5">
