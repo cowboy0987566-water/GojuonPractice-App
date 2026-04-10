@@ -94,6 +94,20 @@ export const SettingsPanel = ({
         </div>
       </div>
 
+      {/* 字體大小調整 */}
+      <div className="bg-white p-5 rounded-2xl border-2 border-slate-100 shadow-sm transition-all hover:border-rose-200">
+        <div className="flex justify-between items-center mb-3">
+          <div>
+            <DT tKey="五十音表字卡大小" settings={settings} spanClass="font-bold text-slate-950 leading-tight" />
+            <DT tKey="調整字卡中的日文字體尺寸" settings={settings} spanClass="text-xs text-slate-800 mt-1" />
+          </div>
+          <span className="text-xl font-bold text-rose-500">{settings.tableFontSize || 28}px</span>
+        </div>
+        <input type="range" min="20" max="48" step="1" value={settings.tableFontSize || 28}
+          onChange={e => setSettings({...settings, tableFontSize: parseInt(e.target.value)})}
+          className="w-full accent-rose-500 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+      </div>
+
       {/* 顯示設定開關 */}
       <div className="space-y-4">
         {[['showRomaji','sr','srD'],['showJpSubtext','sj','sjD'],['keepCustomOpen','keepCustomOpen','keepCustomOpenD']].map(([field, tk, descTk]) => (

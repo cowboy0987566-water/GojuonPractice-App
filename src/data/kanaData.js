@@ -66,14 +66,13 @@ export const rowDefs = [
   { id: 'ya', tKey: 'rowYa', label: 'や行', chars: ['ya', 'yu', 'yo'] },
   { id: 'ra', tKey: 'rowRa', label: 'ら行', chars: ['ra', 'ri', 'ru', 're', 'ro'] },
   { id: 'wa', tKey: 'rowWa', label: 'わ・ん', chars: ['wa', 'wo', 'n'] },
-  { id: 'dakuon', tKey: 'rowDakuon', label: '濁音 (全部)', chars: ['ga','gi','gu','ge','go','za','ji','zu','ze','zo','da','dji','dzu','de','do','ba','bi','bu','be','bo'] },
-  { id: 'handakuon', tKey: 'rowHandakuon', label: '半濁音 (全部)', chars: ['pa','pi','pu','pe','po'] },
-  { id: 'yoon', tKey: 'rowYoon', label: '拗音 (全部)', chars: ['kya','kyu','kyo','sha','shu','sho','cha','chu','cho','nya','nyu','nyo','hya','hyu','hyo','mya','myu','myo','rya','ryu','ryo','gya','gyu','gyo','ja','ju','jo','bya','byu','byo','pya','pyu','pyo'] }
+  { id: 'dakuon', tKey: 'rowDakuHandaku', label: '濁音・半濁音', chars: ['ga','gi','gu','ge','go','za','ji','zu','ze','zo','da','dji','dzu','de','do','ba','bi','bu','be','bo','pa','pi','pu','pe','po'] },
+  { id: 'yoon', tKey: 'rowYoon', label: '拗音', chars: ['kya','kyu','kyo','sha','shu','sho','cha','chu','cho','nya','nyu','nyo','hya','hyu','hyo','mya','myu','myo','rya','ryu','ryo','gya','gyu','gyo','ja','ju','jo','bya','byu','byo','pya','pyu','pyo'] }
 ];
 
 export const rowGroups = [
   { tKey: 'grpBasic', items: rowDefs.slice(0, 10) },
-  { tKey: 'grpAdv', items: rowDefs.slice(10, 13) }
+  { tKey: 'grpAdv', items: rowDefs.slice(10, 12) }
 ];
 
 export const colDefs = [
@@ -84,7 +83,7 @@ export const colDefs = [
   { id: 'col-o', tKey: 'colO', label: 'お段', chars: ['o','ko','so','to','no','ho','mo','yo','ro','wo','go','zo','do','bo','po'] },
   { id: 'col-ya', tKey: 'colYa', label: 'ゃ段(拗)', chars: ['kya','sha','cha','nya','hya','mya','rya','gya','ja','bya','pya'] },
   { id: 'col-yu', tKey: 'colYu', label: 'ゅ段(拗)', chars: ['kyu','shu','chu','nyu','hyu','myu','ryu','gyu','ju','byu','pyu'] },
-  { id: 'col-yo', tKey: 'colYo', label: 'ょ段(拗)', chars: ['kyo','sho','cho','nyo','hyo','myo','ryo','gyo','jo','byo','pyo'] },
+  { id: 'col-yo', tKey: 'colYo', label: 'ょ段(拗)', chars: ['kyo','sho','cho','nyo','hyo','myo','rya','gya','ja','bya','pya'] },
   { id: 'col-n', tKey: 'colN', label: '撥音(ん)', chars: ['n'] }
 ];
 

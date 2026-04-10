@@ -66,7 +66,7 @@ export default function App() {
         setSelectedCols(['col-a', 'col-i', 'col-u', 'col-e', 'col-o']);
         break;
       case 'dakuon':
-        setSelectedRows(['dakuon', 'handakuon']);
+        setSelectedRows(['dakuon']);
         setSelectedCols(['col-a', 'col-i', 'col-u', 'col-e', 'col-o']);
         break;
       case 'yoon':
@@ -570,21 +570,16 @@ export default function App() {
                    <div className="p-4 border-t border-slate-100 animate-in slide-in-from-top-2 duration-200">
                      {/* 行選擇 */}
               <div className="mb-5">
-                <div className="flex justify-between items-center mb-3">
-                  <DT tKey="s1" className="items-start" spanClass="font-bold text-slate-950 text-base leading-tight" />
-                  <div className="flex bg-slate-100 p-1 rounded-lg gap-1">
-                    <button onClick={() => setSelectedRows(rowDefs.map(r => r.id))} className="px-2 py-1 rounded text-xs font-bold text-slate-800 hover:text-rose-500 active:bg-white"><DT tKey="selAll" flexCol={false} /></button>
-                    <button onClick={() => setSelectedRows([])} className="px-2 py-1 rounded text-xs font-bold text-slate-800 hover:text-slate-950 active:bg-white"><DT tKey="deselAll" flexCol={false} /></button>
-                  </div>
-                </div>
                 {rowGroups.map((group, gIdx) => (
                   <div key={gIdx} className="mb-3">
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <div className={`w-1 h-3.5 rounded-full ${gIdx === 0 ? 'bg-rose-400' : 'bg-indigo-400'}`} />
-                      <DT tKey={group.tKey} flexCol={false} spanClass="text-xs font-bold text-slate-800" />
-                    </div>
+                    {group.tKey !== 'grpAdv' && (
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <div className={`w-1 h-3.5 rounded-full ${gIdx === 0 ? 'bg-rose-400' : 'bg-indigo-400'}`} />
+                        <DT tKey={group.tKey} flexCol={false} spanClass="text-xs font-bold text-slate-800" />
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-2">
-                      {group.items.map(row => (
+                      {group.items.filter(r => r.id !== 'dakuon' && r.id !== 'yoon').map(row => (
                         <button key={row.id} onClick={() => { setSelectedRows(p => p.includes(row.id) ? p.filter(id => id !== row.id) : [...p, row.id]); setActivePreset(null); }}
                           className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedRows.includes(row.id) ? 'bg-rose-500 text-white' : 'bg-white border border-slate-200 text-slate-900 hover:border-rose-300'}`}>
                           <DT tKey={row.tKey} flexCol={false} />
@@ -597,19 +592,14 @@ export default function App() {
 
               {/* 段選擇 */}
               <div className="mb-5 pt-4 border-t border-slate-200">
-                <div className="flex justify-between items-center mb-3">
-                  <DT tKey="s2" className="items-start" spanClass="font-bold text-slate-950 text-base leading-tight" />
-                  <div className="flex bg-slate-100 p-1 rounded-lg gap-1">
-                    <button onClick={() => setSelectedCols(colDefs.map(c => c.id))} className="px-2 py-1 rounded text-xs font-bold text-slate-800 hover:text-rose-500 active:bg-white"><DT tKey="selAll" flexCol={false} /></button>
-                    <button onClick={() => setSelectedCols([])} className="px-2 py-1 rounded text-xs font-bold text-slate-800 hover:text-slate-950 active:bg-white"><DT tKey="deselAll" flexCol={false} /></button>
-                  </div>
-                </div>
                 {colGroups.map((group, gIdx) => (
                   <div key={gIdx} className="mb-3">
-                    <div className="flex items-center gap-1.5 mb-2">
-                       <div className={`w-1 h-3.5 rounded-full ${gIdx === 0 ? 'bg-indigo-400' : 'bg-amber-400'}`} />
-                       <DT tKey={group.tKey} flexCol={false} spanClass="text-xs font-bold text-slate-800" />
-                    </div>
+                    {group.tKey !== 'grpColYoon' && (
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <div className={`w-1 h-3.5 rounded-full ${gIdx === 0 ? 'bg-indigo-400' : 'bg-amber-400'}`} />
+                        <DT tKey={group.tKey} flexCol={false} spanClass="text-xs font-bold text-slate-800" />
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-2">
                        {group.items.map(col => (
                          <button key={col.id} onClick={() => { setSelectedCols(p => p.includes(col.id) ? p.filter(id => id !== col.id) : [...p, col.id]); setActivePreset(null); }}
