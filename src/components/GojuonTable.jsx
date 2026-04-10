@@ -9,25 +9,32 @@ const KanaCell = ({ romajiKey, srsData, tableDisplay, playAudio }) => {
   if (!kana) return <div className="p-1"></div>;
 
   const stats = srsData[romajiKey] || { mistakes: 0, corrects: 0 };
-  const hasDisplay = tableDisplay.hiragana || tableDisplay.katakana || tableDisplay.romaji;
-
+  
   return (
     <button
       onClick={() => playAudio(kana.katakana)}
-      className="flex flex-col items-center justify-center p-2 bg-white rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50 shadow-sm transition-all active:scale-95 min-h-[4rem]"
+      className="flex flex-col w-full active:scale-95 transition-transform hover:opacity-85 shadow-sm"
       title="播放發音"
     >
-      {tableDisplay.hiragana && <span className="text-xl font-bold text-slate-950 leading-tight">{kana.hiragana}</span>}
-      {tableDisplay.katakana && <span className="text-xl font-bold text-slate-900 leading-tight">{kana.katakana}</span>}
-      {tableDisplay.romaji && <span className="text-[0.65rem] text-slate-600 font-bold uppercase mt-1 tracking-wider">{kana.romaji}</span>}
-      {!hasDisplay && !tableDisplay.stats && <Volume2 size={16} className="text-slate-300" />}
+      <div className="w-full aspect-[4/5] bg-[#b1eee4] flex flex-col px-1.5 py-1">
+        <div className="flex-1 flex items-center justify-center">
+          {tableDisplay.hiragana && <span className="text-2xl sm:text-3xl font-medium text-slate-900">{kana.hiragana}</span>}
+        </div>
+        <div className="flex justify-between items-end w-full leading-none mt-1">
+          <span className="text-sm font-medium text-slate-700">{tableDisplay.katakana ? kana.katakana : '\u00A0'}</span>
+          <span className="text-sm font-medium text-slate-700">{tableDisplay.romaji ? kana.romaji : '\u00A0'}</span>
+        </div>
+      </div>
+      <div className="h-7 sm:h-8 w-full bg-[#52bfb2] flex items-center px-1.5">
+        <Volume2 size={18} className="text-[#0e6157]" fill="currentColor" strokeWidth={1} />
+      </div>
       
       {tableDisplay.stats && (
-        <div className="flex gap-1 mt-2 w-full justify-center opacity-90 transition-opacity">
-          <div className="flex items-center gap-0.5 bg-green-50 text-green-600 px-1 py-0.5 rounded text-[0.6rem] font-bold shadow-sm border border-green-100">
+        <div className="flex gap-1 py-1 px-1 w-full bg-white justify-center border-x border-b border-slate-100">
+          <div className="flex items-center gap-0.5 text-green-600 text-[0.65rem] font-bold">
              <CheckCircle2 size={10} /> <span>{stats.corrects || 0}</span>
           </div>
-          <div className="flex items-center gap-0.5 bg-red-50 text-red-500 px-1 py-0.5 rounded text-[0.6rem] font-bold shadow-sm border border-red-100">
+          <div className="flex items-center gap-0.5 text-rose-500 text-[0.65rem] font-bold ml-1">
              <XCircle size={10} /> <span>{stats.mistakes || 0}</span>
           </div>
         </div>
