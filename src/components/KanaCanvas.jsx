@@ -94,7 +94,7 @@ export const KanaCanvas = forwardRef(({ char, strokeColor = '#000000', lineWidth
   };
 
   return (
-    <div className="relative w-64 h-64 bg-white rounded-2xl border-2 border-rose-100 shadow-inner overflow-hidden flex items-center justify-center select-none touch-none">
+    <div className="relative w-52 h-52 bg-white rounded-2xl border-2 border-rose-100 shadow-inner overflow-hidden flex items-center justify-center select-none touch-none">
       {/* 1. 米字格背景 */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
         {/* 十字線 */}
@@ -114,7 +114,7 @@ export const KanaCanvas = forwardRef(({ char, strokeColor = '#000000', lineWidth
         <img 
           src={svgUrl} 
           alt={char}
-          className="absolute inset-0 w-full h-full p-4 pointer-events-none opacity-20 transition-opacity duration-300"
+          className="absolute inset-0 w-full h-full pointer-events-none opacity-20 transition-opacity duration-300 scale-[1.2]"
           style={{ filter: 'grayscale(100%) brightness(50%)' }}
           onError={(e) => { e.target.style.display = 'none'; }}
         />
