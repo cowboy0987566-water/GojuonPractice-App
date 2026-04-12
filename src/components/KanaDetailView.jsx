@@ -111,7 +111,7 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
             </button>
             
             {/* 假名手寫練習區 */}
-            <div className="relative flex items-center justify-center group scale-110 sm:scale-125 my-8">
+            <div className="relative flex items-center justify-center group scale-110 sm:scale-125 my-4">
               <KanaCanvas 
                 ref={canvasRef}
                 char={currentKana[displayType]} 
@@ -132,7 +132,7 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
           </div>
 
           {/* 控制按鈕區：[切換] [發音] [橡皮擦] */}
-          <div className="flex items-center justify-center gap-6 mt-12 mb-8">
+          <div className="flex items-center justify-center gap-6 mt-6 mb-6">
             {/* 1. 切換按鈕 */}
             <button 
               onClick={() => setDisplayType(prev => prev === 'hiragana' ? 'katakana' : 'hiragana')}
@@ -169,7 +169,6 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
 
           {/* 單字列表 */}
           <div className="w-full max-w-md space-y-4">
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest pl-2">相關單字與句子</h3>
             
             {words.length > 0 ? words.map((item, idx) => {
               const line = parseWordLine(item);
