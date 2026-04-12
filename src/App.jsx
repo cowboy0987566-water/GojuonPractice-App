@@ -71,11 +71,11 @@ export default function App() {
         break;
       case 'dakuon':
         setSelectedRows(['dakuon']);
-        setSelectedCols(['col-a', 'col-i', 'col-u', 'col-e', 'col-o']);
+        setSelectedCols([]); // 不強制選中段，避免視覺混淆
         break;
       case 'yoon':
         setSelectedRows(['yoon']);
-        setSelectedCols(['col-ya', 'col-yu', 'col-yo']);
+        setSelectedCols([]); // 不強制選中段，避免視覺混淆
         break;
       case 'all':
         setSelectedRows(rowDefs.map(r => r.id));
@@ -190,8 +190,13 @@ export default function App() {
     const now = Date.now();
     const safeKana = kanaData.filter(k => k.romaji !== 'xtsu');
     const dueItems = activeKana.filter(k => !currentSrsData[k.romaji] || currentSrsData[k.romaji].nextReview <= now);
-    const pool = dueItems.length > 0 ? dueItems : (activeKana.length > 0 ? activeKana : safeKana);
-    const correctItem = pool[Math.floor(Math.random() * pool.length)];
+    
+    // 如果有選中範圍(activeKana)，則優先從中出題；只有完全沒選範圍時才退回到 safeKana
+    const pool = dueItems.length > 0 ? dueItems : (activeKana.length > 0 ? activeKana : (isSelectionEmpty ? safeKana : activeKana));
+    
+    // 防呆：如果 pool 依然為空（極端情況），則退回 safeKana
+    const finalPool = (pool && pool.length > 0) ? pool : safeKana;
+    const correctItem = finalPool[Math.floor(Math.random() * finalPool.length)];
 
     const getCategory = (r) => tableLayout.seion.flat().includes(r) ? 'seion' : tableLayout.dakuon.flat().includes(r) ? 'dakuon' : tableLayout.yoon.flat().includes(r) ? 'yoon' : 'all';
     const cat = getCategory(correctItem.romaji);
