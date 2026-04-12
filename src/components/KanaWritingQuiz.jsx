@@ -48,11 +48,11 @@ export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, se
   /** 開始一輪測驗 */
   const startQuiz = useCallback((mode) => {
     const activeKana = getActiveKana(selectedRows, selectedCols);
-    // 為每題隨機決定方向
+    // 依據首頁「測驗目標」決定轉寫方向
     const selected = shuffleArray([...activeKana]).slice(0, QUESTIONS_PER_SESSION).map(k => ({
       ...k,
       qType: mode === 'mixed-conversion' 
-        ? (Math.random() > 0.5 ? 'hira-to-kata' : 'kata-to-hira')
+        ? (settings.targetKana === 'hira' ? 'kata-to-hira' : 'hira-to-kata')
         : (mode === 'audio' ? 'audio' : mode)
     }));
     
@@ -62,7 +62,8 @@ export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, se
     setScores([]);
     setCurrentResult(null);
     setPhase('question');
-  }, [selectedRows, selectedCols]);
+    setIsScoring(false);
+  }, [selectedRows, selectedCols, settings.targetKana]);
 
   // 若外部傳入初始模式，自動啟動
   useEffect(() => {
