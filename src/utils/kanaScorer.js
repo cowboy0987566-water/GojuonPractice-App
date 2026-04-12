@@ -2,11 +2,19 @@
  * kanaScorer.js
  * 純前端假名手寫評分工具
  * 使用 Canvas 像素比對（膨脹 IoU）實現，不依賴任何外部 API
+ *
+ * v2 改進：
+ *  - 加入 Bounding Box 置中正規化，解決筆跡偏角落導致低分的問題
+ *  - 參考字形像素加入 Map 快取，避免同一字重複渲染
  */
 
-const CANVAS_SIZE = 96;      // 內部比對解析度 (越大越精確，越小越快)
-const DILATION_RADIUS = 7;   // 像素膨脹半徑（容錯用，用戶的筆劃較細）
+const CANVAS_SIZE = 96;      // 內部比對解析度
+const DILATION_RADIUS = 5;   // 置中後對齊更準，膨脹半徑可從 7 降到 5
 const DARK_THRESHOLD = 140;  // 像素亮度閾值 (0=純黑, 255=純白)
+const MIN_BBOX_MARGIN = 4;   // 置中後保留的最小邊距（像素）
+
+/** 參考字形像素快取（避免同一字重複渲染） */
+const refPixelCache = new Map();
 
 /**
  * 評分主函式
@@ -19,16 +27,16 @@ export function scoreHandwriting(userCanvas, targetChar) {
     return { score: 0, label: '未作答', color: '#94a3b8', emoji: '✏️' };
   }
 
-  // 1. 取得用戶手寫的縮放版像素陣列
+  // 1. 取得用戶手寫的縮放版像素陣列（已置中正規化）
   const userPixels = getDownsampledDarkPixels(userCanvas);
   const userPixelCount = userPixels.reduce((a, b) => a + b, 0);
 
   // 若幾乎空白，判定為未作答
-  if (userPixelCount < 40) {
+  if (userPixelCount < 50) {
     return { score: 0, label: '請先寫字', color: '#94a3b8', emoji: '✏️' };
   }
 
-  // 2. 渲染目標字元到像素陣列
+  // 2. 渲染目標字元到像素陣列（已置中正規化 + 快取）
   const refPixels = renderCharToPixels(targetChar);
 
   // 3. 膨脹像素（增加容錯範圍）
@@ -36,8 +44,8 @@ export function scoreHandwriting(userCanvas, targetChar) {
   const dilatedRef  = dilate(refPixels,  CANVAS_SIZE);
 
   // 4. 計算覆蓋率 (recall) 與精準率 (precision)
-  let coverageIntersection = 0; // user (dilated) hits ref (original)
-  let precisionIntersection = 0; // user (original) hits ref (dilated)
+  let coverageIntersection = 0;
+  let precisionIntersection = 0;
   let userCount = 0;
   let refCount = 0;
 
@@ -53,10 +61,9 @@ export function scoreHandwriting(userCanvas, targetChar) {
   // 精準率：用戶的筆劃有多少落在正確區域？
   const precision = userCount > 0 ? precisionIntersection / userCount : 0;
 
-  // 綜合分數 (偏重覆蓋率)
+  // 綜合分數（偏重覆蓋率）+ 輕微加成讓分數更直觀
   const rawScore = (coverage * 0.65 + precision * 0.35) * 100;
-  // 輕微加成讓分數更直觀（不會因為字型差異太嚴苛）
-  const score = Math.round(Math.min(100, rawScore * 1.18));
+  const score = Math.round(Math.min(100, rawScore * 1.15));
 
   return getRating(score);
 }
@@ -69,7 +76,75 @@ function getRating(score) {
   return                  { score, label: '再試一次', color: '#ef4444', emoji: '❌' };
 }
 
-/** 把用戶的 Canvas 縮放到 CANVAS_SIZE x CANVAS_SIZE 並提取深色像素 */
+// ─────────────────────────────────────────────────────────
+// 置中正規化核心函式
+// ─────────────────────────────────────────────────────────
+
+/**
+ * 找出像素陣列中有效（深色）內容的邊界框
+ * @returns {{ minX, minY, maxX, maxY }} 若全空則回傳 null
+ */
+function getBoundingBox(pixels, size) {
+  let minX = size, minY = size, maxX = -1, maxY = -1;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (pixels[y * size + x]) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (maxX < 0) return null; // 全空
+  return { minX, minY, maxX, maxY };
+}
+
+/**
+ * 將筆跡裁切並等比例置中到新的 CANVAS_SIZE x CANVAS_SIZE 陣列
+ * - 保留 MIN_BBOX_MARGIN 像素邊距
+ * - 等比例縮放，不拉伸
+ */
+function cropAndCenter(pixels, size) {
+  const bbox = getBoundingBox(pixels, size);
+  if (!bbox) return pixels; // 空白直接回傳
+
+  const { minX, minY, maxX, maxY } = bbox;
+  const bboxW = maxX - minX + 1;
+  const bboxH = maxY - minY + 1;
+
+  // 目標區域（留邊距後可用的最大正方形）
+  const targetSize = size - MIN_BBOX_MARGIN * 2;
+  const scale = Math.min(targetSize / bboxW, targetSize / bboxH);
+
+  const scaledW = Math.round(bboxW * scale);
+  const scaledH = Math.round(bboxH * scale);
+  const offsetX = Math.round((size - scaledW) / 2);
+  const offsetY = Math.round((size - scaledH) / 2);
+
+  const result = new Uint8Array(size * size);
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      // 映射回原始座標
+      const srcX = Math.round((x - offsetX) / scale) + minX;
+      const srcY = Math.round((y - offsetY) / scale) + minY;
+      if (srcX >= minX && srcX <= maxX && srcY >= minY && srcY <= maxY) {
+        result[y * size + x] = pixels[srcY * size + srcX];
+      }
+    }
+  }
+  return result;
+}
+
+// ─────────────────────────────────────────────────────────
+// 像素提取函式
+// ─────────────────────────────────────────────────────────
+
+/**
+ * 把用戶的 Canvas 縮放到 CANVAS_SIZE x CANVAS_SIZE，
+ * 並進行 Bounding Box 置中正規化後提取深色像素
+ */
 function getDownsampledDarkPixels(sourceCanvas) {
   const offscreen = document.createElement('canvas');
   offscreen.width  = CANVAS_SIZE;
@@ -77,13 +152,19 @@ function getDownsampledDarkPixels(sourceCanvas) {
   const ctx = offscreen.getContext('2d');
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-  // drawImage 會正確處理 HiDPI 縮放（以 canvas.width/height 為基準）
   ctx.drawImage(sourceCanvas, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-  return extractDark(ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE));
+  const raw = extractDark(ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE));
+  // 置中正規化：把筆跡移到畫布中央
+  return cropAndCenter(raw, CANVAS_SIZE);
 }
 
-/** 用瀏覽器字型渲染目標假名，提取深色像素 */
+/**
+ * 用瀏覽器字型渲染目標假名，進行置中正規化後提取深色像素
+ * 結果會被 Map 快取，相同字元不重複渲染
+ */
 function renderCharToPixels(char) {
+  if (refPixelCache.has(char)) return refPixelCache.get(char);
+
   const offscreen = document.createElement('canvas');
   offscreen.width  = CANVAS_SIZE;
   offscreen.height = CANVAS_SIZE;
@@ -91,16 +172,18 @@ function renderCharToPixels(char) {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-  // 使用日文字型，填滿 82% 的畫布
   const fontSize = Math.floor(CANVAS_SIZE * 0.82);
-  // 使用 sans-serif 字型堆疊，確保日文字元正確渲染
   ctx.font = `${fontSize}px "Hiragino Sans", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif`;
   ctx.fillStyle = '#000000';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(char, CANVAS_SIZE / 2, CANVAS_SIZE * 0.53);
 
-  return extractDark(ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE));
+  const raw = extractDark(ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE));
+  // 置中正規化：確保參考字形也以相同方式置中
+  const centered = cropAndCenter(raw, CANVAS_SIZE);
+  refPixelCache.set(char, centered);
+  return centered;
 }
 
 /** 提取 ImageData 中的深色像素（二值化） */

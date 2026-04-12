@@ -6,7 +6,7 @@ import { kanaData, tableLayout, rowDefs, rowGroups, colDefs, colGroups, getToday
 import { i18n } from './data/i18n';
 
 // 邏輯層
-import { useSRS, useDailyStats } from './hooks/useSRS';
+import { useSRS, useDailyStats, computeSRS } from './hooks/useSRS';
 
 // 元件層
 import { BottomNav } from './components/BottomNav';
@@ -226,16 +226,8 @@ export default function App() {
     updateDailyStats(currentQuestion.romaji, isCorrect, getTodayKey());
 
     const key = currentQuestion.romaji;
-    const item = currentSrsData[key] || { rep: 0, interval: 0, ease: 2.5, nextReview: 0, mistakes: 0, corrects: 0 };
-    let grade = isCorrect ? 4 : 0;
-    let { rep, interval, ease, mistakes, corrects = 0 } = item;
-    if (isCorrect) {
-      interval = rep === 0 ? 1 : rep === 1 ? 6 : Math.round(interval * ease);
-      rep += 1; corrects += 1;
-    } else { rep = 0; interval = 1; mistakes += 1; }
-    ease = Math.max(1.3, ease + 0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02));
-    const nextReview = Date.now() + interval * 24 * 60 * 60 * 1000;
-    const updatedSrs = { ...currentSrsData, [key]: { rep, interval, ease, nextReview, mistakes, corrects } };
+    const newItem = computeSRS(currentSrsData[key], isCorrect);
+    const updatedSrs = { ...currentSrsData, [key]: newItem };
     setSrsData(updatedSrs);
 
     if (isCorrect) {
@@ -261,22 +253,10 @@ export default function App() {
    */
   const recordWritingProgress = useCallback((romaji, isCorrect) => {
     updateDailyStats(romaji, isCorrect, getTodayKey());
-    
+    // 使用 computeSRS 純函式，統一 SRS 計算邏輯
     setSrsData(prev => {
-      const item = prev[romaji] || { rep: 0, interval: 0, ease: 2.5, nextReview: 0, mistakes: 0, corrects: 0 };
-      let grade = isCorrect ? 4 : 0;
-      let { rep, interval, ease, mistakes, corrects = 0 } = item;
-      
-      if (isCorrect) {
-        interval = rep === 0 ? 1 : rep === 1 ? 6 : Math.round(interval * ease);
-        rep += 1; corrects += 1;
-      } else {
-        rep = 0; interval = 1; mistakes += 1;
-      }
-      ease = Math.max(1.3, ease + 0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02));
-      const nextReview = Date.now() + interval * 24 * 60 * 60 * 1000;
-      
-      return { ...prev, [romaji]: { rep, interval, ease, nextReview, mistakes, corrects } };
+      const newItem = computeSRS(prev[romaji], isCorrect);
+      return { ...prev, [romaji]: newItem };
     });
   }, [updateDailyStats]);
 

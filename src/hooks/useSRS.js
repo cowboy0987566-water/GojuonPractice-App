@@ -1,5 +1,33 @@
 import { useState, useEffect } from 'react';
 
+/**
+ * computeSRS — SRS 計算純函式（單一真實來源）
+ * 不依賴任何外部 state，可在任何地方安全呼叫。
+ * @param {object} item  - 目前的 SRS 項目（或 undefined 表示首次）
+ * @param {boolean} isCorrect - 是否答對
+ * @returns {object} 新的 SRS 項目
+ */
+export function computeSRS(item, isCorrect) {
+  const safe = item || { rep: 0, interval: 0, ease: 2.5, nextReview: 0, mistakes: 0, corrects: 0 };
+  let { rep, interval, ease, mistakes, corrects = 0 } = safe;
+  const grade = isCorrect ? 4 : 0;
+
+  if (isCorrect) {
+    interval = rep === 0 ? 1 : rep === 1 ? 6 : Math.round(interval * ease);
+    rep += 1;
+    corrects += 1;
+  } else {
+    rep = 0;
+    interval = 1;
+    mistakes += 1;
+  }
+
+  ease = Math.max(1.3, ease + 0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02));
+  const nextReview = Date.now() + interval * 24 * 60 * 60 * 1000;
+
+  return { rep, interval, ease, nextReview, mistakes, corrects };
+}
+
 export const useSRS = () => {
   const [srsData, setSrsData] = useState(() => {
     try {
@@ -12,28 +40,13 @@ export const useSRS = () => {
     localStorage.setItem('gojuon_srs_v1', JSON.stringify(srsData));
   }, [srsData]);
 
+  /**
+   * updateSRS — 更新單一假名的 SRS 資料並寫回 state
+   * 底層使用 computeSRS 純函式計算
+   */
   const updateSRS = (romaji, isCorrect) => {
-    const item = srsData[romaji] || { rep: 0, interval: 0, ease: 2.5, nextReview: 0, mistakes: 0, corrects: 0 };
-    let grade = isCorrect ? 4 : 0;
-    let { rep, interval, ease, mistakes, corrects = 0 } = item;
-
-    if (isCorrect) {
-      if (rep === 0) interval = 1;
-      else if (rep === 1) interval = 6;
-      else interval = Math.round(interval * ease);
-      rep += 1;
-      corrects += 1;
-    } else {
-      rep = 0;
-      interval = 1;
-      mistakes += 1;
-    }
-
-    ease = ease + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02));
-    if (ease < 1.3) ease = 1.3;
-
-    const nextReview = Date.now() + interval * 24 * 60 * 60 * 1000;
-    const updated = { ...srsData, [romaji]: { rep, interval, ease, nextReview, mistakes, corrects } };
+    const newItem = computeSRS(srsData[romaji], isCorrect);
+    const updated = { ...srsData, [romaji]: newItem };
     setSrsData(updated);
     return updated;
   };
