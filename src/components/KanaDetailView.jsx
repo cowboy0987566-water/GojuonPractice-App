@@ -111,7 +111,7 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
             </button>
             
             {/* 假名手寫練習區 */}
-            <div className="relative flex items-center justify-center group my-4 overflow-hidden rounded-2xl">
+            <div className="relative flex items-center justify-center group mt-4 mb-0 overflow-hidden rounded-2xl">
               <KanaCanvas 
                 ref={canvasRef}
                 char={currentKana[displayType]} 
@@ -135,7 +135,7 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
           </div>
 
           {/* 控制按鈕區：[切換] [發音] [橡皮擦] */}
-          <div className="flex items-center justify-center gap-6 mt-2 mb-6">
+          <div className="flex items-center justify-center gap-6 mt-0 mb-6">
             {/* 1. 切換按鈕 */}
             <button 
               onClick={() => setDisplayType(prev => prev === 'hiragana' ? 'katakana' : 'hiragana')}
