@@ -111,18 +111,21 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
             </button>
             
             {/* 假名手寫練習區 */}
-            <div className="relative flex items-center justify-center group my-4">
+            <div className="relative flex items-center justify-center group my-4 overflow-hidden rounded-2xl">
               <KanaCanvas 
                 ref={canvasRef}
                 char={currentKana[displayType]} 
                 strokeColor="#1e293b" 
               />
               
-              {/* 輔助標示：顯示 Romaji 與子類型 */}
-              <div className="absolute -bottom-10 flex items-center gap-4 bg-white/80 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm border border-rose-50">
-                <span className="text-lg font-bold text-slate-400">{currentKana[displayType === 'hiragana' ? 'katakana' : 'hiragana']}</span>
-                <div className="w-px h-4 bg-slate-200"></div>
-                <span className="text-lg font-black text-rose-500 uppercase tracking-wider">{currentKana.romaji}</span>
+              {/* 輔助標示：移入手寫板內部角落 */}
+              <div className="absolute inset-x-0 bottom-2 px-3 flex justify-between items-baseline pointer-events-none select-none z-20">
+                <span className="text-sm font-bold text-slate-400 bg-white/50 backdrop-blur-[2px] px-1.5 py-0.5 rounded shadow-sm border border-slate-100/50">
+                  {currentKana[displayType === 'hiragana' ? 'katakana' : 'hiragana']}
+                </span>
+                <span className="text-sm font-black text-rose-500 uppercase tracking-wider bg-white/50 backdrop-blur-[2px] px-1.5 py-0.5 rounded shadow-sm border border-rose-100/50">
+                  {currentKana.romaji}
+                </span>
               </div>
             </div>
 
