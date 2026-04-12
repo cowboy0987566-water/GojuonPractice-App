@@ -32,12 +32,12 @@ function getActiveKana(selectedRows, selectedCols) {
   return pool;
 }
 
-export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, selectedCols, t, setActiveTab }) => {
-  // 測驗模式: null=選擇畫面 | 'audio' | 'hira-to-kata' | 'kata-to-hira'
-  const [quizMode, setQuizMode] = useState(null);
+export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, selectedCols, t, setActiveTab, initialMode = null }) => {
+  // 測驗模式: null=選擇畫面 | 'audio' | 'mixed-conversion' | ...
+  const [quizMode, setQuizMode] = useState(initialMode);
   // 測驗階段: 'question' | 'result' | 'summary'
   const [phase, setPhase] = useState('question');
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState([]); // [{ ...kana, qType: 'hira-to-kata' | 'kata-to-hira' }]
   const [questionIdx, setQuestionIdx] = useState(0);
   const [scores, setScores] = useState([]);
   const [currentResult, setCurrentResult] = useState(null);
@@ -48,7 +48,14 @@ export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, se
   /** 開始一輪測驗 */
   const startQuiz = useCallback((mode) => {
     const activeKana = getActiveKana(selectedRows, selectedCols);
-    const selected = shuffleArray([...activeKana]).slice(0, QUESTIONS_PER_SESSION);
+    // 為每題隨機決定方向
+    const selected = shuffleArray([...activeKana]).slice(0, QUESTIONS_PER_SESSION).map(k => ({
+      ...k,
+      qType: mode === 'mixed-conversion' 
+        ? (Math.random() > 0.5 ? 'hira-to-kata' : 'kata-to-hira')
+        : (mode === 'audio' ? 'audio' : mode)
+    }));
+    
     setQuizMode(mode);
     setQuestions(selected);
     setQuestionIdx(0);
@@ -57,30 +64,40 @@ export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, se
     setPhase('question');
   }, [selectedRows, selectedCols]);
 
+  // 若外部傳入初始模式，自動啟動
+  useEffect(() => {
+    if (initialMode && questions.length === 0) {
+      startQuiz(initialMode);
+    }
+  }, [initialMode, startQuiz, questions.length]);
+
   const currentQ = questions[questionIdx];
 
   /** 使用者「應該寫出」的字元 */
   const getTargetChar = useCallback(() => {
     if (!currentQ) return '';
-    if (quizMode === 'audio')        return settings.targetKana === 'kata' ? currentQ.katakana : currentQ.hiragana;
-    if (quizMode === 'hira-to-kata') return currentQ.katakana;
-    if (quizMode === 'kata-to-hira') return currentQ.hiragana;
+    const qType = currentQ.qType;
+    if (qType === 'audio')        return settings.targetKana === 'kata' ? currentQ.katakana : currentQ.hiragana;
+    if (qType === 'hira-to-kata') return currentQ.katakana;
+    if (qType === 'kata-to-hira') return currentQ.hiragana;
     return currentQ.hiragana;
-  }, [currentQ, quizMode, settings.targetKana]);
+  }, [currentQ, settings.targetKana]);
 
   /** 出題畫面顯示的提示字元（非音訊模式） */
   const getPromptChar = useCallback(() => {
-    if (!currentQ || quizMode === 'audio') return null;
-    return quizMode === 'hira-to-kata' ? currentQ.hiragana : currentQ.katakana;
-  }, [currentQ, quizMode]);
+    if (!currentQ) return null;
+    const qType = currentQ.qType;
+    if (qType === 'audio') return null;
+    return qType === 'hira-to-kata' ? currentQ.hiragana : currentQ.katakana;
+  }, [currentQ]);
 
   /** 音訊模式：進入新題目時自動播放 */
   useEffect(() => {
-    if (phase === 'question' && quizMode === 'audio' && currentQ) {
+    if (phase === 'question' && currentQ && currentQ.qType === 'audio') {
       const timer = setTimeout(() => playAudio(currentQ.katakana), 350);
       return () => clearTimeout(timer);
     }
-  }, [questionIdx, phase, quizMode, currentQ]);
+  }, [questionIdx, phase, currentQ]);
 
   /** 提交評分 */
   const handleScore = async () => {
