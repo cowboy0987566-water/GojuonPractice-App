@@ -254,6 +254,32 @@ export default function App() {
     processAnswer(isCorrect, srsData);
   };
 
+  /**
+   * 手寫測驗專用的進度紀錄函式
+   * @param {string} romaji - 假名的羅馬音
+   * @param {boolean} isCorrect - 是否答對 (手寫評分 >= 80)
+   */
+  const recordWritingProgress = useCallback((romaji, isCorrect) => {
+    updateDailyStats(romaji, isCorrect, getTodayKey());
+    
+    setSrsData(prev => {
+      const item = prev[romaji] || { rep: 0, interval: 0, ease: 2.5, nextReview: 0, mistakes: 0, corrects: 0 };
+      let grade = isCorrect ? 4 : 0;
+      let { rep, interval, ease, mistakes, corrects = 0 } = item;
+      
+      if (isCorrect) {
+        interval = rep === 0 ? 1 : rep === 1 ? 6 : Math.round(interval * ease);
+        rep += 1; corrects += 1;
+      } else {
+        rep = 0; interval = 1; mistakes += 1;
+      }
+      ease = Math.max(1.3, ease + 0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02));
+      const nextReview = Date.now() + interval * 24 * 60 * 60 * 1000;
+      
+      return { ...prev, [romaji]: { rep, interval, ease, nextReview, mistakes, corrects } };
+    });
+  }, [updateDailyStats]);
+
   const handleTypingSubmit = (e) => {
     if (e) e.preventDefault();
     if (isAnimating || !typingInput.trim()) return;
@@ -336,6 +362,7 @@ export default function App() {
           <KanaWritingQuiz
             onClose={() => setGameState('idle')}
             playAudio={playAudio}
+            recordProgress={recordWritingProgress}
             settings={settings}
             selectedRows={selectedRows}
             selectedCols={selectedCols}

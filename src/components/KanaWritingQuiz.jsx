@@ -32,7 +32,7 @@ function getActiveKana(selectedRows, selectedCols) {
   return pool;
 }
 
-export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, selectedCols, t, setActiveTab, initialMode = null }) => {
+export const KanaWritingQuiz = ({ onClose, playAudio, recordProgress, settings, selectedRows, selectedCols, t, setActiveTab, initialMode = null }) => {
   // 測驗模式: null=選擇畫面 | 'audio' | 'mixed-conversion' | ...
   const [quizMode, setQuizMode] = useState(initialMode);
   // 測驗階段: 'question' | 'result' | 'summary'
@@ -107,7 +107,16 @@ export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, se
     const canvas = canvasRef.current?.getCanvas();
     const targetChar = getTargetChar();
     const result = scoreHandwriting(canvas, targetChar);
-    setCurrentResult({ ...result, targetChar, kana: currentQ });
+    
+    // 判定是否正確 (80分門檻)
+    const isCorrect = result.score >= 80;
+    
+    // 紀錄進度到日曆與 SRS
+    if (recordProgress && currentQ) {
+      recordProgress(currentQ.romaji, isCorrect);
+    }
+
+    setCurrentResult({ ...result, isCorrect, targetChar, kana: currentQ });
     setScores(prev => [...prev, result.score]);
     setPhase('result');
     setIsScoring(false);
