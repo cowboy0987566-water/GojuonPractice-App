@@ -692,24 +692,6 @@ export default function App() {
                     </div>
                   </div>
                   
-                  {/* Advanced */}
-                  <div>
-                    <div className="text-xs font-bold text-slate-600 mb-2 uppercase tracking-widest"><DT tKey="grpTestAdv" flexCol={false}/></div>
-                    <div className="grid grid-cols-1 gap-2">
-                      {[
-                        { id: 'romaji-to-kana', tk: 'mRomaji2Kana', icon: KeyRound },
-                        { id: 'kana-to-romaji', tk: 'mKana2Romaji', icon: KeyRound },
-                        { id: 'typing', tk: 'mTyping', icon: Edit2 } 
-                      ].map(m => (
-                        <button key={m.id} onClick={() => startGame(m.id)} disabled={selectedRows.length === 0 && selectedCols.length === 0}
-                          className={`w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group ${selectedRows.length === 0 && selectedCols.length === 0 ? 'bg-slate-100 border-slate-200 opacity-50 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-sm'}`}>
-                          <DT tKey={m.tk} className="items-start" spanClass="text-[1rem] font-bold text-slate-950 leading-tight" jpClassName="text-[0.6rem] text-slate-600 mt-0.5" />
-                          <m.icon size={18} className="text-slate-300 group-hover:text-indigo-500" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* ✏️ 手寫測驗 */}
                   <div>
                     <div className="text-xs font-bold text-slate-600 mb-2 uppercase tracking-widest">手寫練習</div>
@@ -737,6 +719,24 @@ export default function App() {
                         </div>
                         <PenLine size={18} className={isSelectionEmpty ? 'text-slate-300' : 'text-indigo-400 group-hover:text-indigo-600'} />
                       </button>
+                    </div>
+                  </div>
+
+                  {/* Advanced */}
+                  <div>
+                    <div className="text-xs font-bold text-slate-600 mb-2 uppercase tracking-widest"><DT tKey="grpTestAdv" flexCol={false}/></div>
+                    <div className="grid grid-cols-1 gap-2">
+                      {[
+                        { id: 'romaji-to-kana', tk: 'mRomaji2Kana', icon: KeyRound },
+                        { id: 'kana-to-romaji', tk: 'mKana2Romaji', icon: KeyRound },
+                        { id: 'typing', tk: 'mTyping', icon: Edit2 } 
+                      ].map(m => (
+                        <button key={m.id} onClick={() => startGame(m.id)} disabled={isSelectionEmpty}
+                          className={`w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group ${isSelectionEmpty ? 'bg-slate-50 border-slate-100 opacity-60 cursor-not-allowed' : 'bg-white border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-sm'}`}>
+                          <DT tKey={m.tk} className="items-start" spanClass="text-[1rem] font-bold text-slate-950 leading-tight" jpClassName="text-[0.6rem] text-slate-600 mt-0.5" />
+                          <m.icon size={18} className={isSelectionEmpty ? 'text-slate-300' : 'text-slate-300 group-hover:text-indigo-500'} />
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
