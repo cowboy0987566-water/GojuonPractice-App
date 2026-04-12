@@ -9,22 +9,27 @@ const QUESTIONS_PER_SESSION = 10;
 
 /** 根據已選行/段過濾出有效假名（與 App.jsx 邏輯一致） */
 function getActiveKana(selectedRows, selectedCols) {
+  const safeKana = kanaData.filter(k => k.romaji !== 'xtsu');
   const filtered = kanaData.filter(kana => {
     if (kana.romaji === 'xtsu') return false;
     const rowMatch = rowDefs.find(r => r.chars.includes(kana.romaji));
     const colMatch = colDefs.find(c => c.chars.includes(kana.romaji));
     const inRow = rowMatch && selectedRows.includes(rowMatch.id);
     const inCol = colMatch && selectedCols.includes(colMatch.id);
+    
+    // 如果兩者都有選，取交集
     if (selectedRows.length > 0 && selectedCols.length > 0) return inRow && inCol;
+    // 如果只選行
     if (selectedRows.length > 0) return inRow;
+    // 如果只選段
     if (selectedCols.length > 0) return inCol;
+    
     return false;
   });
-  // 若未選任何範圍，退回到基礎清音作為預設
-  if (filtered.length === 0) {
-    return kanaData.filter(k => k.romaji !== 'xtsu').slice(0, 10);
-  }
-  return filtered;
+
+  // 如果選出來是有東西的，就用選出的。否則退回到「全部」（safeKana），與 App.jsx 行為一致
+  const pool = filtered.length > 0 ? filtered : safeKana;
+  return pool;
 }
 
 export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, selectedCols, t, setActiveTab }) => {
