@@ -164,6 +164,9 @@ export default function App() {
     }
   }, [gameState, currentQuestion, isAnimating, showCorrection, settings.audioMode, settings.audioInterval, playAudio]);
 
+  // 是否未選任何範圍（用於禁用測驗按鈕）
+  const isSelectionEmpty = selectedRows.length === 0 && selectedCols.length === 0;
+
   // ─── 出題邏輯 ───
   const generateNextQuestion = useCallback((currentMode, currentSrsData, currentSettings) => {
     const activeKana = kanaData.filter(kana => {
@@ -713,24 +716,26 @@ export default function App() {
                     <div className="grid grid-cols-1 gap-2">
                       <button
                         onClick={() => { setWritingQuizMode('audio'); setGameState('writing-quiz'); }}
-                        className="w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group bg-white border-rose-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm"
+                        disabled={isSelectionEmpty}
+                        className={`w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group ${isSelectionEmpty ? 'bg-slate-50 border-slate-100 opacity-60 cursor-not-allowed' : 'bg-white border-rose-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm'}`}
                       >
-                        <div className="flex flex-col items-start">
-                          <span className="text-[1rem] font-black text-rose-600 leading-tight">🔊 聽音辨識寫字</span>
+                        <div className="flex flex-col items-start text-left">
+                          <span className={`text-[1rem] font-black leading-tight ${isSelectionEmpty ? 'text-slate-400' : 'text-rose-600'}`}>🔊 聽音辨識寫字</span>
                           <span className="text-[0.7rem] text-slate-400 mt-0.5">聽到發音，寫下正確假名</span>
                         </div>
-                        <Volume2 size={18} className="text-rose-400 group-hover:text-rose-600" />
+                        <Volume2 size={18} className={isSelectionEmpty ? 'text-slate-300' : 'text-rose-400 group-hover:text-rose-600'} />
                       </button>
 
                       <button
                         onClick={() => { setWritingQuizMode('mixed-conversion'); setGameState('writing-quiz'); }}
-                        className="w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group bg-white border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-sm"
+                        disabled={isSelectionEmpty}
+                        className={`w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group ${isSelectionEmpty ? 'bg-slate-50 border-slate-100 opacity-60 cursor-not-allowed' : 'bg-white border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-sm'}`}
                       >
-                        <div className="flex flex-col items-start">
-                          <span className="text-[1rem] font-black text-indigo-600 leading-tight">🔄 平片假名互轉</span>
+                        <div className="flex flex-col items-start text-left">
+                          <span className={`text-[1rem] font-black leading-tight ${isSelectionEmpty ? 'text-slate-400' : 'text-indigo-600'}`}>🔄 平片假名互轉</span>
                           <span className="text-[0.7rem] text-slate-400 mt-0.5">看到平假寫片假，或反之</span>
                         </div>
-                        <PenLine size={18} className="text-indigo-400 group-hover:text-indigo-600" />
+                        <PenLine size={18} className={isSelectionEmpty ? 'text-slate-300' : 'text-indigo-400 group-hover:text-indigo-600'} />
                       </button>
                     </div>
                   </div>
