@@ -139,34 +139,34 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
             {/* 1. 切換按鈕 */}
             <button 
               onClick={() => setDisplayType(prev => prev === 'hiragana' ? 'katakana' : 'hiragana')}
-              className="flex items-center justify-center w-14 h-14 bg-white text-slate-600 rounded-2xl shadow-sm border-2 border-slate-100 hover:border-indigo-200 hover:text-indigo-500 active:scale-90 transition-all group relative"
+              className="flex items-center justify-center w-11 h-11 bg-white text-slate-600 rounded-xl shadow-sm border-2 border-slate-100 hover:border-indigo-200 hover:text-indigo-500 active:scale-90 transition-all group relative"
               title="切換平/片假名"
             >
               <div className="flex flex-col items-center leading-none">
-                <span className={`text-sm font-bold ${displayType === 'hiragana' ? 'text-indigo-600 scale-110' : 'text-slate-400'}`}>あ</span>
-                <span className={`text-sm font-bold ${displayType === 'katakana' ? 'text-rose-600 scale-110' : 'text-slate-400'}`}>ア</span>
+                <span className={`text-[10px] font-bold ${displayType === 'hiragana' ? 'text-indigo-600' : 'text-slate-400'}`}>あ</span>
+                <span className={`text-[10px] font-bold ${displayType === 'katakana' ? 'text-rose-600' : 'text-slate-400'}`}>ア</span>
               </div>
               <div className="absolute -bottom-1 -right-1 bg-slate-100 rounded-full p-0.5 border border-white">
-                <Languages size={10} />
+                <Languages size={8} />
               </div>
             </button>
 
             {/* 2. 發音按鈕 */}
             <button 
               onClick={() => playAudio(currentKana[displayType])} 
-              className="flex items-center justify-center w-16 h-16 bg-rose-100 text-rose-600 rounded-full shadow-md hover:bg-rose-200 active:scale-95 transition-all"
+              className="flex items-center justify-center w-13 h-13 bg-rose-100 text-rose-600 rounded-full shadow-md hover:bg-rose-200 active:scale-95 transition-all"
               title="播放發音"
             >
-              <Volume2 size={32} />
+              <Volume2 size={24} />
             </button>
 
             {/* 3. 橡皮擦按鈕 (移到發音按鈕右邊) */}
             <button 
               onClick={() => canvasRef.current?.clear()}
-              className="flex items-center justify-center w-14 h-14 bg-white text-rose-500 rounded-2xl shadow-sm border-2 border-rose-100 hover:bg-rose-50 active:scale-90 transition-all"
+              className="flex items-center justify-center w-11 h-11 bg-white text-rose-500 rounded-xl shadow-sm border-2 border-rose-100 hover:bg-rose-50 active:scale-90 transition-all"
               title="清除筆跡"
             >
-              <Eraser size={26} />
+              <Eraser size={20} />
             </button>
           </div>
 
