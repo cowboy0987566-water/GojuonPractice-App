@@ -135,7 +135,7 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
           </div>
 
           {/* 控制按鈕區：[切換] [發音] [橡皮擦] */}
-          <div className="flex items-center justify-center gap-6 mt-6 mb-6">
+          <div className="flex items-center justify-center gap-6 mt-2 mb-6">
             {/* 1. 切換按鈕 */}
             <button 
               onClick={() => setDisplayType(prev => prev === 'hiragana' ? 'katakana' : 'hiragana')}
