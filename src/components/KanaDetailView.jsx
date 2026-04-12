@@ -111,7 +111,7 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
             </button>
             
             {/* 假名手寫練習區 */}
-            <div className="relative flex items-center justify-center group scale-110 sm:scale-125 my-4">
+            <div className="relative flex items-center justify-center group my-4">
               <KanaCanvas 
                 ref={canvasRef}
                 char={currentKana[displayType]} 
