@@ -124,10 +124,14 @@ export const KanaCanvas = forwardRef(({ char, strokeColor = '#000000', lineWidth
       <canvas
         ref={canvasRef}
         className="relative z-10 w-full h-full cursor-crosshair"
-        onPointerDown={startDrawing}
-        onPointerMove={draw}
-        onPointerUp={stopDrawing}
+        onPointerDown={(e) => { e.stopPropagation(); startDrawing(e); }}
+        onPointerMove={(e) => { e.stopPropagation(); draw(e); }}
+        onPointerUp={(e) => { e.stopPropagation(); stopDrawing(e); }}
         onPointerLeave={stopDrawing}
+        // 額外阻止觸控事件冒泡，防止觸發父層的滑動翻頁
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       />
     </div>
   );
