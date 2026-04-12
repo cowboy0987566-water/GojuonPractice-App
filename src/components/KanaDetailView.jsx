@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, ChevronLeft, ChevronRight, X, Users, Eraser } from 'lucide-react';
+import { Volume2, ChevronLeft, ChevronRight, X, Users, Eraser, Languages } from 'lucide-react';
 import { kanaData } from '../data/kanaData';
 import { kanaVocab } from '../data/kanaVocab';
 import { DT } from './DT';
 import { KanaCanvas } from './KanaCanvas';
+import { BottomNav } from './BottomNav';
 
-export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, settings, availableVoices, t }) => {
+export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, settings, availableVoices, t, setActiveTab }) => {
   // viewingKana is romaji string
   
   const flattedKana = kanaData.filter(k => k.romaji !== 'xtsu'); // Exclude sokuon if needed, but let's keep it safe.
@@ -22,6 +23,7 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [slideDirection, setSlideDirection] = useState(null); // 'left' or 'right' for animation
+  const [displayType, setDisplayType] = useState(settings?.tableMainKana === 'kata' ? 'katakana' : 'hiragana');
   const canvasRef = useRef(null);
   
   const minSwipeDistance = 50;
@@ -109,26 +111,16 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
             </button>
             
             {/* 假名手寫練習區 */}
-            <div className="relative flex items-center justify-center group">
+            <div className="relative flex items-center justify-center group scale-110 sm:scale-125 my-8">
               <KanaCanvas 
                 ref={canvasRef}
-                char={currentKana[mainType]} 
+                char={currentKana[displayType]} 
                 strokeColor="#1e293b" 
               />
               
-              {/* 橡皮擦按鈕 - 浮動在右側 */}
-              <button 
-                onClick={() => canvasRef.current?.clear()}
-                className="absolute -right-14 p-3 bg-rose-50 text-rose-500 rounded-2xl shadow-md border-2 border-rose-100 hover:bg-rose-100 active:scale-95 transition-all flex flex-col items-center gap-1"
-                title="清除筆跡"
-              >
-                <Eraser size={22} />
-                <span className="text-[10px] font-bold">清除</span>
-              </button>
-
               {/* 輔助標示：顯示 Romaji 與子類型 */}
               <div className="absolute -bottom-10 flex items-center gap-4 bg-white/80 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm border border-rose-50">
-                <span className="text-lg font-bold text-slate-400">{currentKana[subType]}</span>
+                <span className="text-lg font-bold text-slate-400">{currentKana[displayType === 'hiragana' ? 'katakana' : 'hiragana']}</span>
                 <div className="w-px h-4 bg-slate-200"></div>
                 <span className="text-lg font-black text-rose-500 uppercase tracking-wider">{currentKana.romaji}</span>
               </div>
@@ -139,9 +131,41 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
             </button>
           </div>
 
-          <button onClick={() => playAudio(currentKana[mainType])} className="mt-10 mb-6 flex items-center gap-2 px-6 py-3 bg-rose-100 text-rose-600 rounded-full font-bold active:scale-95 transition-transform shadow-sm">
-            <Volume2 size={20} /> 唸出假名
-          </button>
+          {/* 控制按鈕區：[切換] [發音] [橡皮擦] */}
+          <div className="flex items-center justify-center gap-6 mt-12 mb-8">
+            {/* 1. 切換按鈕 */}
+            <button 
+              onClick={() => setDisplayType(prev => prev === 'hiragana' ? 'katakana' : 'hiragana')}
+              className="flex items-center justify-center w-14 h-14 bg-white text-slate-600 rounded-2xl shadow-sm border-2 border-slate-100 hover:border-indigo-200 hover:text-indigo-500 active:scale-90 transition-all group relative"
+              title="切換平/片假名"
+            >
+              <div className="flex flex-col items-center leading-none">
+                <span className={`text-sm font-bold ${displayType === 'hiragana' ? 'text-indigo-600 scale-110' : 'text-slate-400'}`}>あ</span>
+                <span className={`text-sm font-bold ${displayType === 'katakana' ? 'text-rose-600 scale-110' : 'text-slate-400'}`}>ア</span>
+              </div>
+              <div className="absolute -bottom-1 -right-1 bg-slate-100 rounded-full p-0.5 border border-white">
+                <Languages size={10} />
+              </div>
+            </button>
+
+            {/* 2. 發音按鈕 */}
+            <button 
+              onClick={() => playAudio(currentKana[displayType])} 
+              className="flex items-center justify-center w-16 h-16 bg-rose-100 text-rose-600 rounded-full shadow-md hover:bg-rose-200 active:scale-95 transition-all"
+              title="播放發音"
+            >
+              <Volume2 size={32} />
+            </button>
+
+            {/* 3. 橡皮擦按鈕 (移到發音按鈕右邊) */}
+            <button 
+              onClick={() => canvasRef.current?.clear()}
+              className="flex items-center justify-center w-14 h-14 bg-white text-rose-500 rounded-2xl shadow-sm border-2 border-rose-100 hover:bg-rose-50 active:scale-90 transition-all"
+              title="清除筆跡"
+            >
+              <Eraser size={26} />
+            </button>
+          </div>
 
           {/* 單字列表 */}
           <div className="w-full max-w-md space-y-4">
@@ -194,6 +218,17 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
           </div>
         </div>
       </div>
+      
+      {/* 底部導覽列 */}
+      <BottomNav 
+        activeTab="table" 
+        onTabChange={(tab) => {
+          setViewingKana(null);
+          setActiveTab(tab);
+        }} 
+        t={t} 
+        uiLang={settings.uiLang} 
+      />
     </div>
   );
 };

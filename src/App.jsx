@@ -317,6 +317,7 @@ export default function App() {
             settings={settings}
             availableVoices={availableVoices}
             t={t}
+            setActiveTab={setActiveTab}
           />
         )}
 
