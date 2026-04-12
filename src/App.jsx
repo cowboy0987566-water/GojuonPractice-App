@@ -15,12 +15,14 @@ import { GojuonTable } from './components/GojuonTable';
 import { StatsView } from './components/StatsView';
 import { LearningCalendar } from './components/LearningCalendar';
 import { SettingsPanel } from './components/SettingsPanel';
+import { KanaDetailView } from './components/KanaDetailView';
 
 export default function App() {
   // ─── 狀態管理 ───
   const [activeTab, setActiveTab] = useState('menu');   // 底部 Tab
   const [gameState, setGameState] = useState('idle');   // idle | playing | langPicker
   const [mode, setMode] = useState('hira-to-kata');
+  const [viewingKana, setViewingKana] = useState(null);
 
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [options, setOptions] = useState([]);
@@ -303,7 +305,20 @@ export default function App() {
               <DT tKey="sub" spanClass="text-xs font-medium leading-none" jpClassName="mt-0.5 text-[0.6rem]" />
             </div>
           )}
+
         </div>
+
+        {/* 📖 單字詳細視圖（覆蓋全部範圍） */}
+        {viewingKana && (
+          <KanaDetailView
+            viewingKana={viewingKana}
+            setViewingKana={setViewingKana}
+            playAudio={playAudio}
+            settings={settings}
+            availableVoices={availableVoices}
+            t={t}
+          />
+        )}
 
         {/* ── 內容區 ── */}
         <div className="p-4 sm:p-5 flex-grow flex flex-col overflow-y-auto bg-slate-50 min-h-0">
@@ -699,6 +714,8 @@ export default function App() {
               setTableDisplay={setTableDisplay}
               playAudio={playAudio}
               settings={settings}
+              setSettings={setSettings}
+              setViewingKana={setViewingKana}
             />
           )}
 
