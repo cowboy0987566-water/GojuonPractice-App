@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, ChevronLeft, ChevronRight, X, Users, Eraser } from 'lucide-react';
 import { kanaData } from '../data/kanaData';
 import { kanaVocab } from '../data/kanaVocab';
