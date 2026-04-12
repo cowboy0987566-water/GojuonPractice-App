@@ -17,9 +17,10 @@ export const KanaCanvas = forwardRef(({ char, strokeColor = '#000000', lineWidth
     clearCanvas();
   }, [char]);
 
-  // 暴露清除方法給父組件
+  // 暴露清除方法與取得 Canvas 給父組件 (手寫評分需要)
   useImperativeHandle(ref, () => ({
-    clear: clearCanvas
+    clear: clearCanvas,
+    getCanvas: () => canvasRef.current,
   }));
 
   const clearCanvas = () => {

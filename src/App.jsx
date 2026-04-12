@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Volume2, Play, CheckCircle2, XCircle, CalendarDays, ChevronLeft, ChevronRight, Zap, Globe, Eye, EyeOff, Edit2, KeyRound, Users, Settings2, X, Download, Share } from 'lucide-react';
+import { Volume2, Play, CheckCircle2, XCircle, CalendarDays, ChevronLeft, ChevronRight, Zap, Globe, Eye, EyeOff, Edit2, KeyRound, Users, Settings2, X, Download, Share, PenLine } from 'lucide-react';
 
 // 資料層
 import { kanaData, tableLayout, rowDefs, rowGroups, colDefs, colGroups, getTodayKey, shuffleArray } from './data/kanaData';
@@ -16,11 +16,12 @@ import { StatsView } from './components/StatsView';
 import { LearningCalendar } from './components/LearningCalendar';
 import { SettingsPanel } from './components/SettingsPanel';
 import { KanaDetailView } from './components/KanaDetailView';
+import { KanaWritingQuiz } from './components/KanaWritingQuiz';
 
 export default function App() {
   // ─── 狀態管理 ───
   const [activeTab, setActiveTab] = useState('menu');   // 底部 Tab
-  const [gameState, setGameState] = useState('idle');   // idle | playing | langPicker
+  const [gameState, setGameState] = useState('idle');   // idle | playing | langPicker | writing-quiz
   const [mode, setMode] = useState('hira-to-kata');
   const [viewingKana, setViewingKana] = useState(null);
 
@@ -316,6 +317,19 @@ export default function App() {
             playAudio={playAudio}
             settings={settings}
             availableVoices={availableVoices}
+            t={t}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {/* ✏️ 手寫測驗（覆蓋全部範圍） */}
+        {gameState === 'writing-quiz' && (
+          <KanaWritingQuiz
+            onClose={() => setGameState('idle')}
+            playAudio={playAudio}
+            settings={settings}
+            selectedRows={selectedRows}
+            selectedCols={selectedCols}
             t={t}
             setActiveTab={setActiveTab}
           />
@@ -689,6 +703,21 @@ export default function App() {
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  {/* ✏️ 手寫測驗 */}
+                  <div>
+                    <div className="text-xs font-bold text-slate-600 mb-2 uppercase tracking-widest">手寫練習</div>
+                    <button
+                      onClick={() => setGameState('writing-quiz')}
+                      className="w-full flex items-center justify-between px-4 py-4 border-2 rounded-xl transition-all group bg-white border-rose-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-sm"
+                    >
+                      <div className="flex flex-col items-start">
+                        <span className="text-[1rem] font-black text-rose-600 leading-tight">✏️ AI 手寫測驗</span>
+                        <span className="text-[0.7rem] text-slate-400 mt-0.5">聽音寫字 · 平假名↔片假名</span>
+                      </div>
+                      <PenLine size={18} className="text-rose-400 group-hover:text-rose-600" />
+                    </button>
                   </div>
                 </div>
               </div>
