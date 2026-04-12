@@ -131,84 +131,6 @@ export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, se
   const failCount    = scores.filter(s => s < 70).length;
 
   // ─────────────────────────────────────────
-  // Screen A: 模式選擇
-  // ─────────────────────────────────────────
-  if (quizMode === null) {
-    return (
-      <div className="absolute inset-0 z-50 bg-slate-50 flex flex-col">
-        <div className="bg-rose-500 pt-5 pb-4 px-4 text-white flex-shrink-0 flex items-center justify-between shadow-md">
-          <button onClick={onClose} className="p-2 bg-rose-600/50 hover:bg-rose-600 rounded-full transition-colors active:scale-95">
-            <ChevronLeft size={24} />
-          </button>
-          <div className="font-black text-lg tracking-widest">✏️ 手寫測驗</div>
-          <div className="w-10" />
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-5 pb-28">
-          <p className="text-slate-400 text-sm text-center mb-6 font-medium">
-            選擇測驗模式，在手寫板上寫出正確的假名
-          </p>
-
-          <div className="space-y-4">
-            {/* 聽音寫字 */}
-            <button onClick={() => startQuiz('audio')}
-              className="w-full bg-white rounded-2xl p-5 border-2 border-slate-100 shadow-sm text-left hover:border-rose-300 hover:shadow-md active:scale-[0.98] transition-all">
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm">
-                  <Volume2 size={28} className="text-rose-500" />
-                </div>
-                <div>
-                  <div className="font-black text-slate-900 text-lg">聽音寫字</div>
-                  <div className="text-slate-500 text-sm mt-1">聽到發音，寫出對應的假名</div>
-                  <div className="mt-2 inline-flex items-center gap-1.5 bg-rose-50 text-rose-600 text-xs font-bold px-2.5 py-1 rounded-full">
-                    難度 ⭐⭐⭐
-                  </div>
-                </div>
-              </div>
-            </button>
-
-            {/* 平 → 片 */}
-            <button onClick={() => startQuiz('hira-to-kata')}
-              className="w-full bg-white rounded-2xl p-5 border-2 border-slate-100 shadow-sm text-left hover:border-indigo-300 hover:shadow-md active:scale-[0.98] transition-all">
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm">
-                  <span className="text-xl font-black text-indigo-600">あ→ア</span>
-                </div>
-                <div>
-                  <div className="font-black text-slate-900 text-lg">平假名 → 片假名</div>
-                  <div className="text-slate-500 text-sm mt-1">看到平假名，寫出對應的片假名</div>
-                  <div className="mt-2 inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-600 text-xs font-bold px-2.5 py-1 rounded-full">
-                    難度 ⭐⭐
-                  </div>
-                </div>
-              </div>
-            </button>
-
-            {/* 片 → 平 */}
-            <button onClick={() => startQuiz('kata-to-hira')}
-              className="w-full bg-white rounded-2xl p-5 border-2 border-slate-100 shadow-sm text-left hover:border-purple-300 hover:shadow-md active:scale-[0.98] transition-all">
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm">
-                  <span className="text-xl font-black text-purple-600">ア→あ</span>
-                </div>
-                <div>
-                  <div className="font-black text-slate-900 text-lg">片假名 → 平假名</div>
-                  <div className="text-slate-500 text-sm mt-1">看到片假名，寫出對應的平假名</div>
-                  <div className="mt-2 inline-flex items-center gap-1.5 bg-purple-50 text-purple-600 text-xs font-bold px-2.5 py-1 rounded-full">
-                    難度 ⭐⭐
-                  </div>
-                </div>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <BottomNav activeTab="menu" onTabChange={(tab) => { onClose(); setActiveTab(tab); }} t={t} uiLang={settings.uiLang} />
-      </div>
-    );
-  }
-
-  // ─────────────────────────────────────────
   // Screen B: 成績總覽
   // ─────────────────────────────────────────
   if (phase === 'summary') {
@@ -261,7 +183,7 @@ export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, se
               return (
                 <div key={i} className={`rounded-xl p-2 border-2 text-center ${cls}`}>
                   <div className="text-lg font-black">
-                    {quizMode === 'hira-to-kata' ? q.katakana : q.hiragana}
+                    {q.qType === 'hira-to-kata' ? q.katakana : q.hiragana}
                   </div>
                   <div className="text-[10px] font-bold">{s}分</div>
                 </div>
@@ -274,10 +196,6 @@ export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, se
             <button onClick={() => startQuiz(quizMode)}
               className="w-full py-4 bg-rose-500 text-white font-black rounded-2xl text-lg shadow-md hover:bg-rose-600 active:scale-95 transition-all flex items-center justify-center gap-2">
               <RefreshCw size={20} /> 再來一次
-            </button>
-            <button onClick={() => setQuizMode(null)}
-              className="w-full py-4 bg-white text-slate-700 font-black rounded-2xl text-lg shadow-sm border-2 border-slate-100 hover:bg-slate-50 active:scale-95 transition-all">
-              選擇其他模式
             </button>
           </div>
         </div>
@@ -292,17 +210,17 @@ export const KanaWritingQuiz = ({ onClose, playAudio, settings, selectedRows, se
   // ─────────────────────────────────────────
   const targetChar = getTargetChar();
   const promptChar = getPromptChar();
-  const progressPct = (questionIdx / questions.length) * 100;
-  const modeLabel = quizMode === 'audio' ? '聽音寫字'
-                  : quizMode === 'hira-to-kata' ? '平 → 片'
-                  : '片 → 平';
+  const progressPct = (questionIdx / (questions.length || 1)) * 100;
+  const modeLabel = quizMode === 'audio' ? '聽音辨識寫字'
+                  : quizMode === 'mixed-conversion' ? '平片假名互轉'
+                  : '手寫測驗';
 
   return (
     <div className="absolute inset-0 z-50 bg-slate-50 flex flex-col">
       {/* Header with progress */}
       <div className="bg-rose-500 pt-5 pb-3 px-4 text-white flex-shrink-0 shadow-md">
         <div className="flex items-center justify-between mb-2.5">
-          <button onClick={() => setQuizMode(null)} className="p-2 bg-rose-600/50 hover:bg-rose-600 rounded-full transition-colors active:scale-95">
+          <button onClick={onClose} className="p-2 bg-rose-600/50 hover:bg-rose-600 rounded-full transition-colors active:scale-95">
             <ChevronLeft size={24} />
           </button>
           <div className="flex flex-col items-center">
