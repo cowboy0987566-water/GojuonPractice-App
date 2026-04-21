@@ -111,11 +111,12 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
             </button>
             
             {/* 假名手寫練習區 */}
-            <div className="relative flex items-center justify-center group mt-4 mb-0 overflow-hidden rounded-2xl">
+            <div className="relative flex-1 min-w-0 flex items-center justify-center group overflow-hidden rounded-2xl">
               <KanaCanvas 
                 ref={canvasRef}
                 char={currentKana[displayType]} 
-                strokeColor="#1e293b" 
+                strokeColor="#1e293b"
+                className="w-full aspect-square"
               />
               
               {/* 輔助標示：移入手寫板內部角落 */}
@@ -128,6 +129,7 @@ export const KanaDetailView = ({ viewingKana, setViewingKana, playAudio, setting
                 </span>
               </div>
             </div>
+
 
             <button onClick={goNext} disabled={currentIndex === flattedKana.length - 1} className="p-3 bg-white text-slate-400 rounded-full shadow-sm hover:text-rose-500 disabled:opacity-30 disabled:hover:text-slate-400 z-10">
               <ChevronRight size={24} />

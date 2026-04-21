@@ -8,10 +8,10 @@
  *  - 參考字形像素加入 Map 快取，避免同一字重複渲染
  */
 
-const CANVAS_SIZE = 96;      // 內部比對解析度
-const DILATION_RADIUS = 5;   // 置中後對齊更準，膨脹半徑可從 7 降到 5
+const CANVAS_SIZE = 160;     // 內部比對解析度 (提升至 160 增加細線假名辨識)
+const DILATION_RADIUS = 7;   // 因應解析度提升，調整膨脹半徑 (原5 -> 7)
 const DARK_THRESHOLD = 140;  // 像素亮度閾值 (0=純黑, 255=純白)
-const MIN_BBOX_MARGIN = 4;   // 置中後保留的最小邊距（像素）
+const MIN_BBOX_MARGIN = 6;   // 置中後保留的最小邊距（像素）
 
 /** 參考字形像素快取（避免同一字重複渲染） */
 const refPixelCache = new Map();
@@ -58,12 +58,19 @@ export function scoreHandwriting(userCanvas, targetChar) {
 
   // 覆蓋率：用戶寫的區域有多少命中了參考字？
   const coverage  = refCount  > 0 ? coverageIntersection  / refCount  : 0;
-  // 精準率：用戶的筆劃有多少落在正確區域？
+  // 精準率：用戶的筆劃有多少落在正確區域？（多餘筆畫會拉低此值）
   const precision = userCount > 0 ? precisionIntersection / userCount : 0;
 
-  // 綜合分數（偏重覆蓋率）+ 輕微加成讓分數更直觀
-  const rawScore = (coverage * 0.65 + precision * 0.35) * 100;
-  const score = Math.round(Math.min(100, rawScore * 1.15));
+  // 綜合分數：透過 precision 平方放大對「多餘筆畫」的懲罰
+  let rawScore = (coverage * 0.5 + Math.pow(precision, 2) * 0.5) * 100;
+
+  // 【多餘筆畫極端懲罰】若精準率過低（寫太多或亂塗），給予斷崖式扣分
+  if (precision < 0.65) {
+    rawScore *= (precision / 0.65);
+  }
+
+  // 輕微加成讓正常書寫更容易達到滿分
+  const score = Math.round(Math.min(100, Math.max(0, rawScore * 1.15)));
 
   return getRating(score);
 }

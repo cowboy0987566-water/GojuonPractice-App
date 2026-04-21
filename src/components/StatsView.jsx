@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DT } from './DT';
 import { kanaData } from '../data/kanaData';
 
@@ -11,12 +11,12 @@ export const StatsView = ({ srsData, settings, t }) => {
     return <div className="flex flex-col items-end leading-tight"><span>{t('ab')} {Math.ceil(diffHours / 24)} {t('dl')}</span></div>;
   };
 
-  const getSortedStats = () => {
-    return kanaData.filter(k => k.romaji !== 'xtsu').map(kana => {
+  const sortedStats = useMemo(() =>
+    kanaData.filter(k => k.romaji !== 'xtsu').map(kana => {
       const data = srsData[kana.romaji] || { mistakes: 0, corrects: 0, nextReview: 0, rep: 0 };
       return { ...kana, ...data };
-    }).sort((a, b) => b.mistakes - a.mistakes || a.nextReview - b.nextReview);
-  };
+    }).sort((a, b) => b.mistakes - a.mistakes || a.nextReview - b.nextReview)
+  , [srsData]);
 
   return (
     <div className="flex flex-col flex-grow">
@@ -29,8 +29,8 @@ export const StatsView = ({ srsData, settings, t }) => {
       </div>
       
       <div className="space-y-2">
-        {getSortedStats().map((item, index) => (
-          <div key={index} className="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+        {sortedStats.map((item) => (
+          <div key={item.romaji} className="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="text-xl font-bold text-slate-950 w-8">{item.hiragana}</div>
               <div className="text-xl text-slate-900 w-8">{item.katakana}</div>

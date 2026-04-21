@@ -1,36 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronLeft, Volume2, RotateCcw, CheckCircle, Award, ArrowRight, RefreshCw } from 'lucide-react';
-import { kanaData, rowDefs, colDefs, shuffleArray } from '../data/kanaData';
+import { kanaData, rowDefs, colDefs, shuffleArray, getActiveKana } from '../data/kanaData';
 import { KanaCanvas } from './KanaCanvas';
 import { BottomNav } from './BottomNav';
 import { scoreHandwriting } from '../utils/kanaScorer';
 
 const QUESTIONS_PER_SESSION = 10;
 
-/** 根據已選行/段過濾出有效假名（與 App.jsx 邏輯一致） */
-function getActiveKana(selectedRows, selectedCols) {
-  const safeKana = kanaData.filter(k => k.romaji !== 'xtsu');
-  const filtered = kanaData.filter(kana => {
-    if (kana.romaji === 'xtsu') return false;
-    const rowMatch = rowDefs.find(r => r.chars.includes(kana.romaji));
-    const colMatch = colDefs.find(c => c.chars.includes(kana.romaji));
-    const inRow = rowMatch && selectedRows.includes(rowMatch.id);
-    const inCol = colMatch && selectedCols.includes(colMatch.id);
-    
-    // 如果兩者都有選，取交集
-    if (selectedRows.length > 0 && selectedCols.length > 0) return inRow && inCol;
-    // 如果只選行
-    if (selectedRows.length > 0) return inRow;
-    // 如果只選段
-    if (selectedCols.length > 0) return inCol;
-    
-    return false;
-  });
 
-  // 如果選出來是有東西的，就用選出的。否則退回到「全部」（safeKana），與 App.jsx 行為一致
-  const pool = filtered.length > 0 ? filtered : safeKana;
-  return pool;
-}
 
 export const KanaWritingQuiz = ({ onClose, playAudio, recordProgress, settings, selectedRows, selectedCols, t, setActiveTab, initialMode = null }) => {
   // 測驗模式: null=選擇畫面 | 'audio' | 'mixed-conversion' | ...
@@ -44,6 +21,12 @@ export const KanaWritingQuiz = ({ onClose, playAudio, recordProgress, settings, 
   const [isScoring, setIsScoring] = useState(false);
 
   const canvasRef = useRef(null);
+
+  // 用 ref 儲存最新的 playAudio，防止 effect 因函式參照變化重跑
+  const playAudioRef = useRef(playAudio);
+  useEffect(() => {
+    playAudioRef.current = playAudio;
+  }, [playAudio]);
 
   /** 開始一輪測驗 */
   const startQuiz = useCallback((mode) => {
@@ -95,7 +78,7 @@ export const KanaWritingQuiz = ({ onClose, playAudio, recordProgress, settings, 
   /** 音訊模式：進入新題目時自動播放 */
   useEffect(() => {
     if (phase === 'question' && currentQ && currentQ.qType === 'audio') {
-      const timer = setTimeout(() => playAudio(currentQ.katakana), 350);
+      const timer = setTimeout(() => playAudioRef.current(currentQ.katakana), 350);
       return () => clearTimeout(timer);
     }
   }, [questionIdx, phase, currentQ]);
@@ -190,12 +173,21 @@ export const KanaWritingQuiz = ({ onClose, playAudio, recordProgress, settings, 
                         : s >= 70 ? 'bg-blue-50 text-blue-700 border-blue-200'
                         : s >= 50 ? 'bg-amber-50 text-amber-700 border-amber-200'
                         : 'bg-red-50 text-red-600 border-red-200';
+
+              // 目標字（使用者應該寫出的）
+              const targetChar = q.qType === 'audio'
+                ? (settings.targetKana === 'kata' ? q.katakana : q.hiragana)
+                : q.qType === 'hira-to-kata' ? q.katakana : q.hiragana;
+
+              // 提示字（出題時顯示的）
+              const promptChar = q.qType === 'audio' ? '🔊'
+                : q.qType === 'hira-to-kata' ? q.hiragana : q.katakana;
+
               return (
-                <div key={i} className={`rounded-xl p-2 border-2 text-center ${cls}`}>
-                  <div className="text-lg font-black">
-                    {q.qType === 'hira-to-kata' ? q.katakana : q.hiragana}
-                  </div>
-                  <div className="text-[10px] font-bold">{s}分</div>
+                <div key={i} className={`rounded-xl p-1.5 border-2 text-center ${cls}`}>
+                  <div className="text-[9px] font-bold opacity-60 leading-none mb-0.5">{promptChar}</div>
+                  <div className="text-lg font-black leading-none">{targetChar}</div>
+                  <div className="text-[10px] font-bold mt-0.5">{s}分</div>
                 </div>
               );
             })}
@@ -234,7 +226,7 @@ export const KanaWritingQuiz = ({ onClose, playAudio, recordProgress, settings, 
             <ChevronLeft size={24} />
           </button>
           <div className="flex flex-col items-center">
-            <div className="font-black text-base tracking-widest">✏️ 手寫測驗</div>
+            <div className="font-black text-base tracking-widest">✏️ {t('grpTestWrite')}</div>
             <div className="text-xs text-rose-200 font-bold">{modeLabel}</div>
           </div>
           <div className="text-sm font-black bg-rose-600/40 px-3 py-1 rounded-full">

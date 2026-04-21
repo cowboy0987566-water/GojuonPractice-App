@@ -107,3 +107,27 @@ export const shuffleArray = (array) => {
   }
   return newArray;
 };
+
+export const getActiveKana = (selectedRows, selectedCols) => {
+  const safeKana = kanaData.filter(k => k.romaji !== 'xtsu');
+  const filtered = kanaData.filter(kana => {
+    if (kana.romaji === 'xtsu') return false;
+    const rowMatch = rowDefs.find(r => r.chars.includes(kana.romaji));
+    const colMatch = colDefs.find(c => c.chars.includes(kana.romaji));
+    const inRow = rowMatch && selectedRows.includes(rowMatch.id);
+    const inCol = colMatch && selectedCols.includes(colMatch.id);
+    
+    // 如果兩者都有選，取交集
+    if (selectedRows.length > 0 && selectedCols.length > 0) return inRow && inCol;
+    // 如果只選行
+    if (selectedRows.length > 0) return inRow;
+    // 如果只選段
+    if (selectedCols.length > 0) return inCol;
+    
+    return false;
+  });
+
+  // 如果選出來是有東西的，就用選出的。否則退回到「全部」（safeKana）
+  const pool = filtered.length > 0 ? filtered : safeKana;
+  return pool;
+};

@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } f
  * KanaCanvas 組件
  * 提供米字格背景、筆劃順序引導 SVG 以及 Canvas 手寫功能。
  */
-export const KanaCanvas = forwardRef(({ char, strokeColor = '#000000', lineWidth = 6 }, ref) => {
+export const KanaCanvas = forwardRef(({ char, strokeColor = '#000000', lineWidth = 6, className = 'w-64 h-64' }, ref) => {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [svgUrl, setSvgUrl] = useState('');
@@ -13,7 +13,7 @@ export const KanaCanvas = forwardRef(({ char, strokeColor = '#000000', lineWidth
   useEffect(() => {
     if (!char) return;
     const codePoint = char.charCodeAt(0).toString(16).padStart(5, '0');
-    setSvgUrl(`https://raw.githubusercontent.com/KanjiVG/kanjivg/master/kanji/${codePoint}.svg`);
+    setSvgUrl(`/kanji/${codePoint}.svg`);
     clearCanvas();
   }, [char]);
 
@@ -30,22 +30,29 @@ export const KanaCanvas = forwardRef(({ char, strokeColor = '#000000', lineWidth
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
-  // 初始化 Canvas 尺寸
+  // 初始化 Canvas 尺寸，並監聽容器大小變化（解決彈性寬度時比例異常）
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
-    // 處理高解析度螢幕 (Retina)
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = strokeColor;
-    ctx.lineWidth = lineWidth;
+
+    const initCanvas = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return; // 尚未佈局完成，跳過
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = lineWidth;
+    };
+
+    initCanvas();
+    const observer = new ResizeObserver(initCanvas);
+    observer.observe(canvas);
+    return () => observer.disconnect();
   }, [strokeColor, lineWidth]);
 
   const getCoordinates = (e) => {
@@ -95,7 +102,7 @@ export const KanaCanvas = forwardRef(({ char, strokeColor = '#000000', lineWidth
   };
 
   return (
-    <div className="relative w-64 h-64 bg-white rounded-2xl border-2 border-rose-100 shadow-inner overflow-hidden flex items-center justify-center select-none touch-none">
+    <div className={`relative ${className} bg-white rounded-2xl border-2 border-rose-100 shadow-inner overflow-hidden flex items-center justify-center select-none touch-none`}>
       {/* 1. 米字格背景 */}
       <div className="absolute inset-0 pointer-events-none opacity-20">
         {/* 十字線 */}

@@ -15,23 +15,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(reg => {
-            reg.onupdatefound = () => {
-              const installingWorker = reg.installing;
-              installingWorker.onstatechange = () => {
-                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // 發現新版本，通知使用者或自動重新整理
-                  console.log('New version available, reloading...');
-                  window.location.reload();
-                }
-              };
-            };
-          }).catch(err => console.error('SW registration failed:', err));
-        });
-      }
-    </script>
   </body>
 </html>

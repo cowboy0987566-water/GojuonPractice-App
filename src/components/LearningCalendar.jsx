@@ -64,8 +64,12 @@ export const LearningCalendar = ({ dailyStats, selDateStr, setSelDateStr, settin
       </div>
 
       <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6">
-        <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-600 mb-2">
-          <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+        <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-600 mb-2 uppercase">
+          {[...Array(7)].map((_, i) => (
+            <div key={i}>
+              {new Intl.DateTimeFormat(settings?.uiLang || 'zh-TW', { weekday: 'short' }).format(new Date(2024, 0, 7 + i))}
+            </div>
+          ))}
         </div>
         <div className="grid grid-cols-7 gap-1">{renderCalendarDays()}</div>
       </div>
